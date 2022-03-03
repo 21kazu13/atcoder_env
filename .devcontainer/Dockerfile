@@ -11,7 +11,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 # Working directory for 'RUN', 'CMD', 'ENTRYPOINT, 'COPY', 'ADD'
 # https://docs.docker.jp/engine/reference/builder.html#workdir
 ARG WORKDIR=/project
-WORKDIR ${WORKDIR}
+WORKDIR $WORKDIR
 
 # Increase timeout for apt-get to 300 seconds
 RUN /bin/echo -e "\n\
@@ -28,11 +28,6 @@ RUN apt-get update \
     && apt-get clean -y \
     && rm -rf /var/lib/apt/lists/*
 
-# change default shell
-RUN zsh
-ENV SHELL=/usr/bin/zsh
-# Later, add to install zsh-completion, 
-
 # Create a non-root user to use if preferred - see https://aka.ms/vscode-remote/containers/non-root-user.
 # https://unit42.paloaltonetworks.jp/non-root-containers-kubernetes-cve-2019-11245-care/
 # https://qiita.com/syoyo/items/6fa6597b7a6625000e33
@@ -43,7 +38,8 @@ ARG USER_GID=$USER_UID
 # Add sudo support for non-root user
 RUN groupadd --gid $USER_GID $USERNAME \
     && useradd -s /bin/bash --uid $USER_UID --gid $USER_GID -m $USERNAME \
-    && RUN echo "$USERNAME:$USERPASSWD" | chpasswd
+    && echo $USERNAME ALL=\(ALL\) NOPASSWD:ALL > /etc/sudoers.d/$USERNAME \
+    && chmod 0440 /etc/sudoers.d/$USERNAME
 
 # copy requirements files
 COPY ./requirements.txt /tmp/requirements.txt
@@ -52,4 +48,19 @@ COPY ./requirements.txt /tmp/requirements.txt
 RUN pip install -r /tmp/requirements.txt\
     && npm install --global atcoder-cli@2.2.0
 
+# configure for atcoder-cli and online-judge-tools
+COPY ./.zshrc /home/$USERNAME/
+COPY templates/ /home/$USERNAME/.config/atcoder-cli-nodejs/
+ENV URL=https://atcoder.jp/login
+RUN sudo chown -R $USERNAME:$USERNAME /home/$USERNAME/.config/ \
+    && sudo -u $USERNAME acc config default-template py
+
+# change default shell
+RUN zsh
+ENV SHELL=/usr/bin/zsh
+# Later, add to install zsh-completion, 
+
 USER $USERNAME
+
+COPY ./login.sh /tmp/login.sh
+RUN  sudo chmod +x /tmp/login.sh \
