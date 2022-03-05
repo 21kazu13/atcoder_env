@@ -63,4 +63,4 @@ ENV SHELL=/usr/bin/zsh
 USER $USERNAME
 
 COPY ./login.sh /tmp/login.sh
-RUN  sudo chmod +x /tmp/login.sh \
+RUN  sudo chmod +x /tmp/login.sh 
