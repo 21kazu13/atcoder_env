@@ -21,9 +21,9 @@ RUN /bin/echo -e "\n\
 # Configure apt and install packages
 # pypy3 is installed as 7.0.0, but in AtCoder it should be 7.3.0.
 RUN apt-get update \
-    && apt-get -y --no-install-recommends install sudo vim zsh git ssh time tzdata tree sed pypy3\
+    && apt-get -y --no-install-recommends install sudo git vim zsh ssh time tzdata tree sed pypy3\
     && curl -sL https://deb.nodesource.com/setup_14.x | bash - \
-    && apt-get -y install nodejs\
+    && apt-get -y install nodejs \
     && apt-get autoremove -y \
     && apt-get clean -y \
     && rm -rf /var/lib/apt/lists/*
@@ -41,19 +41,21 @@ RUN groupadd --gid $USER_GID $USERNAME \
     && echo $USERNAME ALL=\(ALL\) NOPASSWD:ALL > /etc/sudoers.d/$USERNAME \
     && chmod 0440 /etc/sudoers.d/$USERNAME
 
-# copy requirements files
+# copy requirements files for pip and library install for atcoder
 COPY ./requirements.txt /tmp/requirements.txt
-
-# library install for atcoder
 RUN pip install -r /tmp/requirements.txt\
     && npm install --global atcoder-cli@2.2.0
 
 # configure for atcoder-cli and online-judge-tools
-COPY ./.zshrc /home/$USERNAME/
 COPY templates/ /home/$USERNAME/.config/atcoder-cli-nodejs/
-ENV URL=https://atcoder.jp/login
 RUN sudo chown -R $USERNAME:$USERNAME /home/$USERNAME/.config/ \
     && sudo -u $USERNAME acc config default-template py
+
+# Install for oh-my-posh
+# too heavy...
+# COPY ./.iterm2.omp.json /home/$USERNAME/
+# RUN wget https://github.com/JanDeDobbeleer/oh-my-posh/releases/latest/download/posh-linux-amd64 -O /usr/local/bin/oh-my-posh \
+    # && chmod +x /usr/local/bin/oh-my-posh
 
 # change default shell
 RUN zsh
@@ -61,6 +63,6 @@ ENV SHELL=/usr/bin/zsh
 # Later, add to install zsh-completion, 
 
 USER $USERNAME
-
-COPY ./login.sh /tmp/login.sh
-RUN  sudo chmod +x /tmp/login.sh 
+COPY ./scripts/*.sh /tmp/
+COPY ./.zshrc /home/$USERNAME/
+RUN  sudo chmod +x /tmp/login.sh /tmp/ojfunction.sh

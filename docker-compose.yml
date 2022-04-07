@@ -1,4 +1,4 @@
-version: "3"
+version: "3.2"
 services:
   atcoder_python_env:
     build:
@@ -8,8 +8,9 @@ services:
         WORKDIR: /project
     tty: true 
     volumes:
-      - ${USERPROFILE-~}/work/python3/AtCoder:/project
       - ${USERPROFILE-~}/.ssh:/home/vscode/.ssh
+      - ${USERPROFILE-~}/.gitconfig:/home/vscode/.gitconfig
+      - ${USERPROFILE-~}/work/python3/AtCoder:/project
     image: atcoder_python_env-image
     container_name: atcoder_python_env-container
 
