@@ -25,7 +25,7 @@ RUN /bin/echo -e "\n\
 # Configure apt and install packages
 # pypy3 is installed as 7.0.0, but in AtCoder it should be 7.3.0.
 RUN apt-get update \
-    && apt-get -y --no-install-recommends install sudo vim zsh tzdata pypy3\
+    && apt-get -y --no-install-recommends install sudo vim zsh time tzdata pypy3\
     && curl -sL https://deb.nodesource.com/setup_14.x | bash - \
     && apt-get -y install nodejs \
     && apt-get autoremove -y \
