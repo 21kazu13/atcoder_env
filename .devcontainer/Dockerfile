@@ -1,6 +1,10 @@
 ARG VERSION=3.8.2
 FROM python:${VERSION}
 
+# Setting account name for AtCoder and github
+ENV ACUSER=forzaMilan
+ENV REMOTE=git@github.com:21kazu13/AtCoder.git
+
 #Timezone Setting for Debian GNU/Linux 10
 ENV TZ=Asia/Tokyo
 RUN echo $TZ > /etc/timezone
@@ -10,8 +14,8 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 # Working directory for 'RUN', 'CMD', 'ENTRYPOINT, 'COPY', 'ADD'
 # https://docs.docker.jp/engine/reference/builder.html#workdir
-ARG WORKDIR=/project
-WORKDIR $WORKDIR
+# ARG WORKDIR=/project
+# WORKDIR $WORKDIR
 
 # Increase timeout for apt-get to 300 seconds
 RUN /bin/echo -e "\n\
@@ -21,7 +25,7 @@ RUN /bin/echo -e "\n\
 # Configure apt and install packages
 # pypy3 is installed as 7.0.0, but in AtCoder it should be 7.3.0.
 RUN apt-get update \
-    && apt-get -y --no-install-recommends install sudo git vim zsh ssh time tzdata tree sed pypy3\
+    && apt-get -y --no-install-recommends install sudo vim zsh tzdata pypy3\
     && curl -sL https://deb.nodesource.com/setup_14.x | bash - \
     && apt-get -y install nodejs \
     && apt-get autoremove -y \
@@ -52,10 +56,9 @@ RUN sudo chown -R $USERNAME:$USERNAME /home/$USERNAME/.config/ \
     && sudo -u $USERNAME acc config default-template py
 
 # Install for oh-my-posh
-# too heavy...
-# COPY ./.iterm2.omp.json /home/$USERNAME/
-# RUN wget https://github.com/JanDeDobbeleer/oh-my-posh/releases/latest/download/posh-linux-amd64 -O /usr/local/bin/oh-my-posh \
-    # && chmod +x /usr/local/bin/oh-my-posh
+COPY ./.iterm2.omp.json /home/$USERNAME/
+RUN wget https://github.com/JanDeDobbeleer/oh-my-posh/releases/latest/download/posh-linux-amd64 -O /usr/local/bin/oh-my-posh \
+    && chmod +x /usr/local/bin/oh-my-posh
 
 # change default shell
 RUN zsh
@@ -65,4 +68,7 @@ ENV SHELL=/usr/bin/zsh
 USER $USERNAME
 COPY ./scripts/*.sh /tmp/
 COPY ./.zshrc /home/$USERNAME/
-RUN  sudo chmod +x /tmp/login.sh /tmp/ojfunction.sh
+RUN sudo chmod +x /tmp/login.sh /tmp/ojfunction.sh
+
+# docker-compose is not support for docker BuildKit??
+# RUN --mount=type=ssh git clone --depth 1 git@github.com:21kazu13/AtCoder.git

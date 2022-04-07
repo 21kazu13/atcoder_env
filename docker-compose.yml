@@ -1,16 +1,14 @@
-version: "3.2"
+version: "3.8"
 services:
   atcoder_python_env:
     build:
       context: .
       dockerfile: .devcontainer/Dockerfile
-      args:
-        WORKDIR: /project
-    tty: true 
+    tty: true
     volumes:
-      - ${USERPROFILE-~}/.ssh:/home/vscode/.ssh
-      - ${USERPROFILE-~}/.gitconfig:/home/vscode/.gitconfig
-      - ${USERPROFILE-~}/work/python3/AtCoder:/project
+      - ${USERPROFILE-~}/.ssh:/home/vscode/.ssh:ro
+      - ${USERPROFILE-~}/work/python3/AtCoder/.git/config:/home/vscode/.gitconfig
+      # - ${USERPROFILE-~}/work/python3/AtCoder:/project
     image: atcoder_python_env-image
     container_name: atcoder_python_env-container
 
