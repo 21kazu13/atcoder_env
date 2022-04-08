@@ -23,6 +23,9 @@ def outDirectedGraph(G: list):
     '''
     result = ['```dot','digraph G {']
     for num,item in enumerate(G):
+        if len(item)==0:
+            result.append(f'\t{num};')
+            continue
         for node in item:
             result.append(f'\t{num} -> {node};')
     result.append('}')
@@ -40,6 +43,9 @@ def outUndirectedGraph(G: list):
     '''
     result = ['```dot','graph G {']
     for num,item in enumerate(G):
+        if len(item)==0:
+            result.append(f'\t{num};')
+            continue
         for node in item:
             if num <= node:
                 result.append(f'\t{num} -- {node};')

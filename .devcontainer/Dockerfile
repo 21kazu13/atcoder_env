@@ -66,11 +66,11 @@ ENV SHELL=/usr/bin/zsh
 # Later, add to install zsh-completion, 
 
 USER $USERNAME
-RUN mkdir scripts
-COPY ./scripts/ /home/$USERNAME/
+RUN sudo mkdir scripts && sudo mkdir .vscode
+COPY ./scripts/ /home/$USERNAME/scripts/
 COPY ./dotfiles/.zshrc /home/$USERNAME/
 COPY ./dotfiles/snipet_for_AtCoder.code-snippets /home/$USERNAME/.vscode/
-RUN sudo chmod +x /home/$USERNAME/login.sh /home/$USERNAME/ojfunction.sh
+RUN sudo chmod +x /home/$USERNAME/scripts/login.sh /home/$USERNAME/scripts/ojfunction.sh
 
 # docker-compose is not support for docker BuildKit??
 # RUN --mount=type=ssh git clone --depth 1 git@github.com:21kazu13/AtCoder.git
