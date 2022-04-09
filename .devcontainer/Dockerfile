@@ -35,42 +35,42 @@ RUN apt-get update \
 # Create a non-root user to use if preferred - see https://aka.ms/vscode-remote/containers/non-root-user.
 # https://unit42.paloaltonetworks.jp/non-root-containers-kubernetes-cve-2019-11245-care/
 # https://qiita.com/syoyo/items/6fa6597b7a6625000e33
-ARG USERNAME=vscode
-ARG USERPASSWD=vscode
+ARG USERNAME
+ARG USERPASSWD
 ARG USER_UID=1000
 ARG USER_GID=$USER_UID
-# Add sudo support for non-root user
 RUN groupadd --gid $USER_GID $USERNAME \
-    && useradd -s /bin/bash --uid $USER_UID --gid $USER_GID -m $USERNAME \
-    && echo $USERNAME ALL=\(ALL\) NOPASSWD:ALL > /etc/sudoers.d/$USERNAME \
+    && useradd --uid $USER_UID --gid $USER_GID -m $USERNAME \
+    && echo $USERNAME:$USERPASSWD | chpasswd \
+# Add sudo support for non-root user
+    && echo $USERNAME ALL=\(ALL\) ALL >> /etc/sudoers.d/$USERNAME \
     && chmod 0440 /etc/sudoers.d/$USERNAME
 
 # copy requirements files for pip and library install for atcoder
-COPY ./requirements.txt /tmp/requirements.txt
+COPY --chown=$USERNAME ./requirements.txt /tmp/requirements.txt
 RUN pip install -r /tmp/requirements.txt\
     && npm install --global atcoder-cli@2.2.0
 
-# configure for atcoder-cli and online-judge-tools
-COPY templates/ /home/$USERNAME/.config/atcoder-cli-nodejs/
-RUN sudo chown -R $USERNAME:$USERNAME /home/$USERNAME/.config/ \
-    && sudo -u $USERNAME acc config default-template py
-
 # Install for oh-my-posh
-COPY ./.iterm2.omp.json /home/$USERNAME/
+COPY --chown=$USERNAME ./dotfiles/.iterm2.omp.json /home/$USERNAME/
 RUN wget https://github.com/JanDeDobbeleer/oh-my-posh/releases/latest/download/posh-linux-amd64 -O /usr/local/bin/oh-my-posh \
     && chmod +x /usr/local/bin/oh-my-posh
+    
+# configure for atcoder-cli and online-judge-tools
+COPY --chown=$USERNAME:$USERNAME templates/ /home/$USERNAME/.config/atcoder-cli-nodejs/
+RUN acc config default-template py \
+    && acc config default-task-choice all \
+    && chown -R $USERNAME:$USERNAME /home/$USERNAME/.config/
 
 # change default shell
-RUN zsh
+USER $USERNAME
 ENV SHELL=/usr/bin/zsh
 # Later, add to install zsh-completion, 
 
-USER $USERNAME
-RUN sudo mkdir scripts && sudo mkdir .vscode
-COPY ./scripts/ /home/$USERNAME/scripts/
-COPY ./dotfiles/.zshrc /home/$USERNAME/
-COPY ./dotfiles/snipet_for_AtCoder.code-snippets /home/$USERNAME/.vscode/
-RUN sudo chmod +x /home/$USERNAME/scripts/login.sh /home/$USERNAME/scripts/ojfunction.sh
+COPY --chown=$USERNAME ./dotfiles/.zshrc /home/$USERNAME/
+COPY --chown=$USERNAME ./scripts/snipet_for_AtCoder.code-snippets /home/$USERNAME/.vscode/
+
+WORKDIR /home/$USERNAME
 
 # docker-compose is not support for docker BuildKit??
 # RUN --mount=type=ssh git clone --depth 1 git@github.com:21kazu13/AtCoder.git
