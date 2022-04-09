@@ -3,6 +3,13 @@
 # To visualize graph for tree by using Markdown Preview Enhanced.
 # shd101wyy.markdown-preview-enhanced
 
+# References
+## https://shd101wyy.github.io/markdown-preview-enhanced/#/diagrams
+## https://graphviz.org/doc/info/lang.html
+## https://ja.wikipedia.org/wiki/DOT%E8%A8%80%E8%AA%9E
+
+## できればクラス化したいな...
+## http://pineplanter.moo.jp/non-it-salaryman/2018/09/04/python-external-class/
 '''
 Required format for directed graph by markdown preview enhanced is here:
 * for undirected graph, place 'graph' and '--' instead of 'digraph' and '->'
@@ -16,7 +23,7 @@ digraph G {
 
 '''
 
-def outDirectedGraph(G: list):
+def outDirectedGraph(G: list,s='graph'):
     '''
     input: Directed Graph showed in adjacency list
     output: text formatted to markdown preview enhanced
@@ -31,12 +38,12 @@ def outDirectedGraph(G: list):
     result.append('}')
     result.append('```')
 
-    with open('graph.md','w') as f:
+    with open(s+'.md','w') as f:
         f.write('\n'.join(result))
 
     return
 
-def outUndirectedGraph(G: list):
+def outUndirectedGraph(G: list,s='graph'):
     '''
     input: Undirected Graph showed in adjacency list
     output: text formatted to markdown preview enhanced
@@ -52,7 +59,7 @@ def outUndirectedGraph(G: list):
     result.append('}')
     result.append('```')
 
-    with open('graph.md','w') as f:
+    with open(s+'.md','w') as f:
         f.write('\n'.join(result))
 
     return

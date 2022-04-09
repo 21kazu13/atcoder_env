@@ -101,6 +101,7 @@
 	"visualize graph": {
 		"prefix": "visual",
 		"body": [
+			// reference https://fuji-pocketbook.net/another-dir-module/
 			"sys.path.append(\"/home/vscode/scripts\")",
 			"import visualize",
 			"visualize.outDirectedGraph(G)",
