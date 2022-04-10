@@ -21,7 +21,9 @@ ojt() {
     # echo "filename check OK: ${fn}"
     local str="python ${fn}"
     oj t -c $str
-    return 0
+    local result=$?
+    echo
+    return result
 }
 
 ojtpypy() {
@@ -37,18 +39,30 @@ ojtpypy() {
     # echo "filename check OK: ${fn}"
     local str="pypy3 ${fn}"
     oj t -c $str
-    return 0
+    local result=$?
+    echo
+    return result
 }
 
 accpypy() {
     local fn
     if [ $# = 0 ]; then
-        fn="main.py"
+        if [ ! -e 'main.py' ]; then
+            echo 'cannot find the task to submit.'
+            echo
+            return 1            
+        else
+            fn="main.py"
+        fi
     elif [ ! -e $1 ]; then
         echo "File not exist"
+        echo
         return 1
     else
         local fn=$1
     fi
     acc s $fn -- --guess-python-interpreter pypy
+    local result=$?
+    echo
+    return $result
 }
