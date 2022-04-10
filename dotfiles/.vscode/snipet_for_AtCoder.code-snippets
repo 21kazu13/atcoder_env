@@ -102,10 +102,12 @@
 		"prefix": "visual",
 		"body": [
 			// reference https://fuji-pocketbook.net/another-dir-module/
+			"import sys",
 			"sys.path.append(\"/home/vscode/scripts\")",
 			"import visualize",
-			"visualize.outDirectedGraph(G)",
-			"visualize.outUndirectedGraph(G)"
+			"g = visualize.VisualGraph(G)",
+			"print(g)",
+			"g.generateMarkdown()"
 		]
 	}
 }
