@@ -58,17 +58,19 @@ RUN wget https://github.com/JanDeDobbeleer/oh-my-posh/releases/latest/download/p
     
 # configure for atcoder-cli and online-judge-tools
 COPY --chown=$USERNAME:$USERNAME templates/ /home/$USERNAME/.config/atcoder-cli-nodejs/
-RUN acc config default-template py \
-    && acc config default-task-choice all \
-    && chown -R $USERNAME:$USERNAME /home/$USERNAME/.config/
+RUN chown -R $USERNAME:$USERNAME /home/$USERNAME/.config/
 
 # change default shell
 USER $USERNAME
 ENV SHELL=/usr/bin/zsh
-# Later, add to install zsh-completion, 
 
+# COPY setting files from host
 COPY --chown=$USERNAME ./dotfiles/.zshrc /home/$USERNAME/
-COPY --chown=$USERNAME ./scripts/snipet_for_AtCoder.code-snippets /home/$USERNAME/.vscode/
+
+# Enable atcoder-cli configuration
+RUN acc config default-template py \
+    && acc config default-task-choice all \
+    && acc config default-test-dirname-format test
 
 WORKDIR /home/$USERNAME
 

@@ -18,8 +18,8 @@ autoload -Uz compinit && compinit
 # Function for atcoder-cli & online-judge-tools
 # alias ojt='oj t -c "python main.py"'
 # alias ojtpypy='oj t -c "pypy3 main.py"'
-source ./scripts/ojfunction.sh
-source ./scripts/login.sh
+source ~/scripts/ojfunction.sh
+source ~/scripts/login.sh
 
 # Clone for remote repository
 alias aclone='git clone --depth 1 ${REMOTE} && cd AtCoder'
