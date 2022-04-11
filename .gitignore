@@ -2,5 +2,5 @@
 .DS_Store
 .ssh
 .ssh/**
-./dotfiles/.env
 **__pycache__**
+dotfiles/.env
