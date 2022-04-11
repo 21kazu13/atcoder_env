@@ -1,4 +1,4 @@
-version: "3.8"
+version: "3.3"
 services:
   ac-task:
     build:
@@ -12,7 +12,7 @@ services:
     tty: true
     volumes:
       - ${acSSHDIR-hoge}/.ssh:/home/vscode/.ssh:ro
-      - ${acGITDIR}/.git/config:/home/vscode/.gitconfig
+      - ${acGITFILE}:/home/vscode/.gitconfig:ro
       - ./scripts:/home/vscode/scripts
       - ./dotfiles/.vscode:/home/vscode/.vscode
     image: ac-img
