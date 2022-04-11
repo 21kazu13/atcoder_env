@@ -5,14 +5,18 @@ services:
       context: .
       dockerfile: .devcontainer/Dockerfile
       args:
+        - TZ=$acTIMEZONE
       # should edit workspace directory in devcontainer.json when you change USERNAME
         - USERNAME=vscode
         - USERPASSWD=vscode
     tty: true
     volumes:
-      - ${USERPROFILE-~}/.ssh:/home/vscode/.ssh:ro
-      - ${USERPROFILE-~}/work/python3/AtCoder/.git/config:/home/vscode/.gitconfig
+      - ${acSSHDIR-hoge}/.ssh:/home/vscode/.ssh:ro
+      - ${acGITDIR}/.git/config:/home/vscode/.gitconfig
       - ./scripts:/home/vscode/scripts
       - ./dotfiles/.vscode:/home/vscode/.vscode
     image: ac-img
+    environment:
+      - ACUSER=${acUSERNAME}
+      - REMOTE=${acGITREPOSITORY}
 

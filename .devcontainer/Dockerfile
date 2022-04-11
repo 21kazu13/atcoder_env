@@ -1,21 +1,8 @@
 ARG VERSION=3.8.2
 FROM python:${VERSION}
 
-# Setting account name for AtCoder and github
-ENV ACUSER=forzaMilan
-ENV REMOTE=git@github.com:21kazu13/AtCoder.git
-
-#Timezone Setting for Debian GNU/Linux 10
-ENV TZ=Asia/Tokyo
-RUN echo $TZ > /etc/timezone
-
 #https://qiita.com/udzura/items/576c2c782adb241070bc
 ENV DEBIAN_FRONTEND=noninteractive
-
-# Working directory for 'RUN', 'CMD', 'ENTRYPOINT, 'COPY', 'ADD'
-# https://docs.docker.jp/engine/reference/builder.html#workdir
-# ARG WORKDIR=/project
-# WORKDIR $WORKDIR
 
 # Increase timeout for apt-get to 300 seconds
 RUN /bin/echo -e "\n\
@@ -31,6 +18,13 @@ RUN apt-get update \
     && apt-get autoremove -y \
     && apt-get clean -y \
     && rm -rf /var/lib/apt/lists/*
+
+# Timezone Setting for Debian GNU/Linux 10
+# Ref: https://qiita.com/pyon_kiti_jp/items/e9235f9f49430bb845bb
+ARG TZ
+RUN ln -s -f /usr/share/zoneinfo/$TZ /etc/localtime 
+RUN echo $TZ | tee /etc/timezone >/dev/null
+ENV TZ=$TZ
 
 # Create a non-root user to use if preferred - see https://aka.ms/vscode-remote/containers/non-root-user.
 # https://unit42.paloaltonetworks.jp/non-root-containers-kubernetes-cve-2019-11245-care/
@@ -72,6 +66,8 @@ RUN acc config default-template py \
     && acc config default-task-choice all \
     && acc config default-test-dirname-format test
 
+# Working directory for 'RUN', 'CMD', 'ENTRYPOINT, 'COPY', 'ADD'
+# https://docs.docker.jp/engine/reference/builder.html#workdir
 WORKDIR /home/$USERNAME
 
 # docker-compose is not support for docker BuildKit??
