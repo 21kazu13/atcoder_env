@@ -2,4 +2,5 @@
 .gitignore
 .ssh
 .ssh/**
+./dotfiles/.env
 README.md

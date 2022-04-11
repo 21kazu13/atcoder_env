@@ -11,7 +11,7 @@ services:
         - USERPASSWD=vscode
     tty: true
     volumes:
-      - ${acSSHDIR-hoge}/.ssh:/home/vscode/.ssh:ro
+      - ${acSSHDIR}/.ssh:/home/vscode/.ssh:ro
       - ${acGITFILE}:/home/vscode/.gitconfig:ro
       - ./scripts:/home/vscode/scripts
       - ./dotfiles/.vscode:/home/vscode/.vscode
