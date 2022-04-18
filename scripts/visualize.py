@@ -29,7 +29,7 @@ class VisualGraph:
         self.neighborList = G
         self.numberOfNodes = len(G)
         # 0: no cost of edges, 1: has cost of edges: 
-        self.hasWeight = 0 if type(G[0]) != int else 1
+        self.hasWeight = 0 if type(G[0][0]) == int else 1
         self.hasDirection = 0 if not hasdirection else 1
         self.weightColumn = weightcolumn
         self.numberOfEdges = sum([len(G[i]) for i in range(self.numberOfNodes)])
@@ -61,7 +61,7 @@ class VisualGraph:
             dest = node
             cost = ''
             ex = f'\t{org} {self.expressionOfEdges} {dest};'
-        return(dest,ex)
+        return (dest,ex)
 
 
     def generateMarkdown(self,filename='graph') -> None:
@@ -76,7 +76,6 @@ class VisualGraph:
                 if org > dest and not self.hasDirection:
                     continue
                 res.append(expression)
-
                 with open(filename+'.md','w') as f:
                     f.write('\n'.join(headers+res+footers))
         return
