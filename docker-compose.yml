@@ -6,16 +6,18 @@ services:
       dockerfile: .devcontainer/Dockerfile
       args:
         - TZ=$acTIMEZONE
+        - GITNAME=$acGITNAME
+        - GITEMAIL=$acGITEMAIL
       # should edit workspace directory in devcontainer.json when you change USERNAME
         - USERNAME=vscode
         - USERPASSWD=vscode
     tty: true
     volumes:
       - ${acSSHDIR}/.ssh:/home/vscode/.ssh:ro
-      - ${acGITFILE}:/home/vscode/.gitconfig:ro
       - ./scripts:/home/vscode/scripts
       - ./dotfiles/.vscode:/home/vscode/.vscode
     image: ac-img
+    container_name: ac-task
     environment:
       - ACUSER=${acUSERNAME}
       - REMOTE=${acGITREPOSITORY}

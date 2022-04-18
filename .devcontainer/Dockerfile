@@ -58,6 +58,10 @@ RUN chown -R $USERNAME:$USERNAME /home/$USERNAME/.config/
 USER $USERNAME
 ENV SHELL=/usr/bin/zsh
 
+# Working directory for 'RUN', 'CMD', 'ENTRYPOINT, 'COPY', 'ADD'
+# https://docs.docker.jp/engine/reference/builder.html#workdir
+WORKDIR /home/$USERNAME
+
 # COPY setting files from host
 COPY --chown=$USERNAME ./dotfiles/.zshrc /home/$USERNAME/
 
@@ -66,9 +70,11 @@ RUN acc config default-template py \
     && acc config default-task-choice all \
     && acc config default-test-dirname-format test
 
-# Working directory for 'RUN', 'CMD', 'ENTRYPOINT, 'COPY', 'ADD'
-# https://docs.docker.jp/engine/reference/builder.html#workdir
-WORKDIR /home/$USERNAME
+# Enable git configuration
+ARG GITNAME
+ARG GITEMAIL
+RUN git config --global user.name $GITNAME \
+    && git config --global user.email $GITEMAIL
 
 # docker-compose is not support for docker BuildKit??
 # RUN --mount=type=ssh git clone --depth 1 git@github.com:21kazu13/AtCoder.git
