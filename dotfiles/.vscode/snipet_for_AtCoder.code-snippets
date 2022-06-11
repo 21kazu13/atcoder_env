@@ -16,15 +16,6 @@
 	// 	"description": "Log output to console"
 	// }
 	
-	"std in and out": {
-		"prefix": "prep",
-		"body": [
-			"def ii():return int(input())",
-			"def iim():return map(int,input().split())",
-			"def iil():return list(map(int,input().split()))",
-		],
-		"description": "template for AtCoder in python3"
-	},
 	"bfs": {
 		"prefix": "bfs",
 		"body": [
@@ -87,14 +78,14 @@
 		"prefix": "prime",
 		"body": [
 			"def sieve_of_eratosthenes(n):",
-			"prime = [i if i%2 == 1 else 2 for i in range(n+1)]",
-			"prime[0] = 0",
-			"prime[1] = 1",
-			"for i in range(3, int(n**0.5)+1):",
-			"\tif prime[i] == i:",
-			"\t\tfor j in range(2,n//i+1):",
-			"\t\t\tprime[j*i] = i",
-			"return prime"
+			"\tprime = [i if i%2 == 1 else 2 for i in range(n+1)]",
+			"\tprime[0] = 0",
+			"\tprime[1] = 1",
+			"\tfor i in range(3, int(n**0.5)+1):",
+			"\t\tif prime[i] == i:",
+			"\t\t\tfor j in range(2,n//i+1):",
+			"\t\t\t\tprime[j*i] = i",
+			"\treturn prime"
 		],
 		"description": "sieve of eratosthenes, it can use faster divisor calculations"
 	},
