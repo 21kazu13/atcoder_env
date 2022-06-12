@@ -9,5 +9,6 @@
     },
     "python.analysis.extraPaths": [
         "/home/vscode/scripts"
-    ]
+    ],
+    "python.testing.autoTestDiscoverOnSaveEnabled": false
 }
