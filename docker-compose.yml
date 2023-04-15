@@ -16,6 +16,7 @@ services:
       - ${acSSHDIR}/.ssh:/home/vscode/.ssh:ro
       - ./scripts:/home/vscode/scripts
       - ./dotfiles/.vscode:/home/vscode/.vscode
+      - ./templates/mytemplate:/home/vscode/mytemplate
     image: ac-img
     container_name: ac-task
     environment:

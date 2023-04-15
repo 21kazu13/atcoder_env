@@ -51,7 +51,7 @@ RUN wget https://github.com/JanDeDobbeleer/oh-my-posh/releases/latest/download/p
     && chmod +x /usr/local/bin/oh-my-posh
     
 # configure for atcoder-cli and online-judge-tools
-COPY --chown=$USERNAME:$USERNAME templates/ /home/$USERNAME/.config/atcoder-cli-nodejs/
+COPY --chown=$USERNAME:$USERNAME templates/atcoder-cli-nodejs/ /home/$USERNAME/.config/atcoder-cli-nodejs/
 RUN chown -R $USERNAME:$USERNAME /home/$USERNAME/.config/
 
 # change default shell
