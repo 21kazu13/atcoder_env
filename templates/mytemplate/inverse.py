@@ -10,14 +10,16 @@ class ModFactorial():
             finv (list): finv[i]=(i!)^(-1)modP
             inv (list): inv[i]=i^(-1)modP
         '''
-        fac = [1,1]
-        finv = [1,1]
-        inv = [0,1]
-        for i in range(2, MAX):
-            fac += [fac[-1] * i % P]
-            inv += [P - inv[P%i] * (P // i) %P]
-            finv += [finv[-1] * inv[i] % P]
-    def comb(n,k):
+        self.P = P
+        self.M = M
+        self.fac = [1,1]
+        self.finv = [1,1]
+        self.inv = [0,1]
+        for i in range(2, M):
+            self.fac += [self.fac[-1] * i % P]
+            self.inv += [P - self.inv[P%i] * (P // i) %P]
+            self.finv += [self.finv[-1] * self.inv[i] % P]
+    def comb(self,n,k):
         '''
         Calculate nCk mod P
         Args:
@@ -26,6 +28,6 @@ class ModFactorial():
         Returns:
             (int): nCk mod P. If conditions are not satisfied, return -1
         '''
-        if n < 0 or k < 0 or n < k:
+        if n<0 or k<0 or n<k or n>self.M:
             return -1
-        return fac[n] * finv[k] * finv[n-k] % P
+        return self.fac[n] * self.finv[k] * self.finv[n-k] % self.P
