@@ -47,7 +47,7 @@ RUN pip install -r /tmp/requirements.txt\
 
 # Install for oh-my-posh
 COPY --chown=$USERNAME ./dotfiles/.iterm2.omp.json /home/$USERNAME/
-RUN wget https://github.com/JanDeDobbeleer/oh-my-posh/releases/latest/download/posh-linux-$(uname -m) -O /usr/local/bin/oh-my-posh \
+RUN wget https://github.com/JanDeDobbeleer/oh-my-posh/releases/latest/download/posh-linux-amd64 -O /usr/local/bin/oh-my-posh \
     && chmod +x /usr/local/bin/oh-my-posh
     
 # configure for atcoder-cli and online-judge-tools
