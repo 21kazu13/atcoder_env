@@ -16,34 +16,6 @@
 	// 	"description": "Log output to console"
 	// }
 	
-	"bfs": {
-		"prefix": "bfs",
-		"body": [
-			"from collections import deque",
-			"def bfs(u,n,d):",
-			"\t'''",
-			"\tBFS:O(N*(edge number))",
-			"\t@params",
-			"\t\tint u: initial node ",
-			"\t\tint n: number of total nodes ",
-			"\t\tdict d: graph of all nodes ",
-			"\t\t\tsample ",
-			"\t\t\td = {0:[1,3],3:[2,4,5]} ",
-			"\t@returns",
-			"\t\tlist ans: list of depthes of each node",
-			"\t'''",
-			"\tqueue = deque([u])",
-			"\tans = [-1] * (n+1)",
-			"\twhile queue:",
-			"\t\tv = queue.popleft()",
-			"\t\tfor i in d[v]:",
-			"\t\t\tif ans[i] == -1:",
-			"\t\t\t\tans[i] = v",
-			"\t\t\t\tqueue.append(i)",
-			"\treturn ans"
-		],
-		"description": "bfs template"
-	},
 	"binarySearch" : {
 		"prefix": "binary",
 		"body": [
@@ -152,18 +124,18 @@
             "def dijkstra(s):",
             "    # Graph is given by adj-list form: ",
             "    #    G[v] = [(cost,nex)]",
-            "    INF = 10*18",
+            "    INF = 10**18",
             "    q = []",
-            "    dist = [10**18]*len(G)",
+            "    dist = [INF]*len(G)",
             "    dist[s] = 0",
             "    heappush(q,(0,s))",
             "    while q:",
             "        cur, v = heappop(q)",
             "        if dist[v]<cur: continue",
             "        for add,nex in G[v]:",
-            "            nc = cost+add",
-            "            if nc<dist[v]:",
-            "                dist[v] = nc",
+            "            nc = cur+add",
+            "            if nc<dist[nex]:",
+            "                dist[nex] = nc",
             "                heappush(q,(nc,nex))",
             "    return dist",
         ],
