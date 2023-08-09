@@ -2,7 +2,8 @@
 online-judge-tools==11.5.1
 # debug
 # https://blog.amedama.jp/entry/2016/08/31/213229
-line-profiler==3.5.1
+# This requires cmake, I dropped. 
+# line-profiler==3.5.1
 # libraries
 numpy==1.24.1
 scipy==1.10.1
@@ -24,7 +25,8 @@ lightgbm==3.3.1
 gmpy2==2.1.5
 numba==0.57.0
 ac-library-python @ git+https://github.com/not522/ac-library-python@58f324ec020d57191e7b9e4957b0c5feb5ed3aff
+cppyy==2.4.1
 
-# setuptoolsを更新しないとcppyyのインストールでエラーが出る場合がある
+# setuptoolsを更新しないとcppyyのインストールでエラーが出る場合があるので、これらはDockerfile内でべた書きにする
 # python3.11 -m pip install -U setuptools==66.0.0
 # python3.11 -m pip install cppyy==2.4.1
