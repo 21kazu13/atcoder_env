@@ -34,6 +34,7 @@ z3-solver==4.12.1.0 \
 scikit-learn==1.2.0 \
 ortools==9.5.2237 \
 torch==1.13.1 \
+# M1 macだと1.13.1は入らない
 polars==0.15.15 \
 lightgbm==3.3.1 \
 gmpy2==2.1.5 \
@@ -44,3 +45,13 @@ git+https://github.com/not522/ac-library-python
 python3.11 -m pip install -U setuptools==66.0.0
 python3.11 -m pip install cppyy==2.4.1
 
+# M1 macでcppyyを使うときは、clangの都合上
+#>>> os.environ['EXTRA_CLING_ARGS']
+#' -O2 -march=native'
+#となるとダメなので、
+# error: the clang compiler does not support '-march=native'
+import os
+os.environ['EXTRA_CLING_ARGS'] = ' -O2'
+# が必要
+# https://stackoverflow.com/questions/65966969/why-does-march-native-not-work-on-apple-m1
+# https://github.com/wlav/cppyy-backend/blob/e87dfc842f4ce62fd6a61b0362f8a3008c9732f7/cling/python/cppyy_backend/loader.py

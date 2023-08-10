@@ -13,7 +13,16 @@ RUN /bin/echo -e "\n\
 # g++ needs following reason (fail to install cppyy with pip):
 #   https://qiita.com/kai0706/items/d6ca791e9815d61d5132
 RUN apt-get update \
-    && apt-get -y --no-install-recommends install sudo vim zsh time tzdata gfortran g++ wget bzip2 git curl
+    && apt-get -y --no-install-recommends install \
+        sudo vim zsh time tzdata curl git\
+        wget bzip2 gcc g++ gfortran libopenblas-dev liblapack-dev pkg-config libgeos-dev \
+        build-essential gdb lcov libbz2-dev libffi-dev libgdbm-dev libgdbm-compat-dev liblzma-dev \
+        libncurses5-dev libreadline6-dev libsqlite3-dev libssl-dev \
+        lzma lzma-dev tk-dev uuid-dev zlib1g-dev \
+        # https://github.com/deepgully/pyzil/issues/6
+        # https://devpress.csdn.net/k8s/62fceb917e66823466190f7a.html
+        libgmp-dev libmpc-dev libmpfr-dev
+
 # separate curl installation
 # nodejs<=16 is not worked on WSL2 on Ubunts 20.04 (npm seems to be missing)
 RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash - \
@@ -81,6 +90,7 @@ ENV SHELL=/usr/bin/zsh
 # from here, python package installation
 COPY --chown=$USERNAME ./requirement/*.txt /tmp/
 RUN python -m pip install -U setuptools==66.0.0 \
+    && python -m pip install cmake wheel \
     && python -m pip install -r /tmp/requirements_python.txt
 RUN pypy3 -m pip install -r /tmp/requirements_pypy.txt
 
