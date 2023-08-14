@@ -35,6 +35,7 @@ scikit-learn==1.2.0 \
 ortools==9.5.2237 \
 torch==1.13.1 \
 # M1 macだと1.13.1は入らない
+# https://stackoverflow.com/questions/74219480/cannot-install-pytorch-with-python-3-11-windows
 polars==0.15.15 \
 lightgbm==3.3.1 \
 gmpy2==2.1.5 \

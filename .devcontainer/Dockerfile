@@ -14,7 +14,7 @@ RUN /bin/echo -e "\n\
 #   https://qiita.com/kai0706/items/d6ca791e9815d61d5132
 RUN apt-get update \
     && apt-get -y --no-install-recommends install \
-        sudo vim zsh time tzdata curl git\
+        sudo vim zsh time tzdata curl git ssh\
         wget bzip2 gcc g++ gfortran libopenblas-dev liblapack-dev pkg-config libgeos-dev \
         build-essential gdb lcov libbz2-dev libffi-dev libgdbm-dev libgdbm-compat-dev liblzma-dev \
         libncurses5-dev libreadline6-dev libsqlite3-dev libssl-dev \
@@ -94,6 +94,10 @@ RUN python -m pip install -U setuptools==66.0.0 \
     && python -m pip install -r /tmp/requirements_python.txt
 RUN pypy3 -m pip install -r /tmp/requirements_pypy.txt
 
+# Countermeasure for oj
+# export PATH=$PATH:/home/$(whoami)/.local/bin
+ENV PATH=$PATH:/home/$USERNAME/.local/bin
+
 # Working directory for 'RUN', 'CMD', 'ENTRYPOINT, 'COPY', 'ADD'
 # https://docs.docker.jp/engine/reference/builder.html#workdir
 WORKDIR /home/$USERNAME
@@ -104,7 +108,8 @@ COPY --chown=$USERNAME ./dotfiles/.zshrc /home/$USERNAME/
 # Enable atcoder-cli configuration
 RUN acc config default-template py \
     && acc config default-task-choice all \
-    && acc config default-test-dirname-format test
+    && acc config default-test-dirname-format test \
+    && acc config oj-path /home/$(whoami)/.local/bin/oj
 
 # Enable git configuration
 ARG GITNAME
