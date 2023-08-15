@@ -14,26 +14,38 @@ RUN /bin/echo -e "\n\
 #   https://qiita.com/kai0706/items/d6ca791e9815d61d5132
 RUN apt-get update \
     && apt-get -y --no-install-recommends install \
-        sudo vim zsh time tzdata curl git ssh\
+        sudo vim zsh time tzdata curl git ssh less\
         wget bzip2 gcc g++ gfortran libopenblas-dev liblapack-dev pkg-config libgeos-dev \
         build-essential gdb lcov libbz2-dev libffi-dev libgdbm-dev libgdbm-compat-dev liblzma-dev \
         libncurses5-dev libreadline6-dev libsqlite3-dev libssl-dev \
         lzma lzma-dev tk-dev uuid-dev zlib1g-dev \
         # https://github.com/deepgully/pyzil/issues/6
         # https://devpress.csdn.net/k8s/62fceb917e66823466190f7a.html
-        libgmp-dev libmpc-dev libmpfr-dev
-
-# separate curl installation
-# nodejs<=16 is not worked on WSL2 on Ubunts 20.04 (npm seems to be missing)
-RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash - \
-    && apt-get -y install nodejs \
+        libgmp-dev libmpc-dev libmpfr-dev \
+    && apt-get -y install nodejs npm \
     && apt-get autoremove -y \
     && apt-get clean -y \
     && rm -rf /var/lib/apt/lists/*
 
+# install atcoder-cli from the source (to use python submission)
+# https://oita.oika.me/2020/05/10/at-coder-csharp/ 
+# node should be less than 16 (restrict from atcoder-cli)
+## https://kick-in-the-blog.com/archives/145#toc2
+# designate node version
+## https://qiita.com/aberyotaro/items/0ec54b927d88ae6434f4
+WORKDIR /tmp
+RUN git clone https://github.com/Tatamo/atcoder-cli.git
+WORKDIR /tmp/atcoder-cli
+RUN npm install n --global \
+    && n 16.13.0 \
+    && hash -r \
+    && npm install \
+    && npm install --global
+
 # Pypy installation
 # ref: https://zenn.dev/ytdrep/articles/d65c26201042eb
 # https://downloads.python.org/pypy/
+WORKDIR /
 ARG TARGETPLATFORM
 RUN TARGETPYPY=$( \
         case ${TARGETPLATFORM} in \
@@ -68,20 +80,10 @@ RUN groupadd --gid $USER_GID $USERNAME \
     && echo $USERNAME ALL=\(ALL\) ALL >> /etc/sudoers.d/$USERNAME \
     && chmod 0440 /etc/sudoers.d/$USERNAME
 
-# # copy requirements files for pip and library install for atcoder
-# COPY --chown=$USERNAME ./requirements.txt /tmp/requirements.txt
-# RUN pip install -r /tmp/requirements.txt\
-#     && npm install --global atcoder-cli@2.2.0
-
 # Install for oh-my-posh
 COPY --chown=$USERNAME ./dotfiles/.iterm2.omp.json /home/$USERNAME/
 RUN wget https://github.com/JanDeDobbeleer/oh-my-posh/releases/latest/download/posh-linux-amd64 -O /usr/local/bin/oh-my-posh \
     && chmod +x /usr/local/bin/oh-my-posh
-
-# install and configure for atcoder-cli
-COPY --chown=$USERNAME:$USERNAME templates/atcoder-cli-nodejs/ /home/$USERNAME/.config/atcoder-cli-nodejs/
-RUN npm install --global atcoder-cli@2.2.0 \
-    && chown -R $USERNAME:$USERNAME /home/$USERNAME/.config/
 
 # change default shell
 USER $USERNAME
@@ -93,6 +95,7 @@ RUN python -m pip install -U setuptools==66.0.0 \
     && python -m pip install cmake wheel \
     && python -m pip install -r /tmp/requirements_python.txt
 RUN pypy3 -m pip install -r /tmp/requirements_pypy.txt
+RUN python -m pip install online-judge-tools==11.5.1
 
 # Countermeasure for oj
 # export PATH=$PATH:/home/$(whoami)/.local/bin
@@ -104,6 +107,7 @@ WORKDIR /home/$USERNAME
 
 # COPY setting files from host
 COPY --chown=$USERNAME ./dotfiles/.zshrc /home/$USERNAME/
+COPY --chown=$USERNAME:$USERNAME templates/atcoder-cli-nodejs/ /home/$USERNAME/.config/atcoder-cli-nodejs/
 
 # Enable atcoder-cli configuration
 RUN acc config default-template py \

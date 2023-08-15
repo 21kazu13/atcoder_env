@@ -66,3 +66,26 @@ accpypy() {
     echo
     return $result
 }
+
+accpython() {
+    local fn
+    if [ $# = 0 ]; then
+        if [ ! -e 'main.py' ]; then
+            echo 'cannot find the task to submit.'
+            echo
+            return 1            
+        else
+            fn="main.py"
+        fi
+    elif [ ! -e $1 ]; then
+        echo "File not exist"
+        echo
+        return 1
+    else
+        local fn=$1
+    fi
+    acc s $fn -- -l 5055
+    local result=$?
+    echo
+    return $result
+}
