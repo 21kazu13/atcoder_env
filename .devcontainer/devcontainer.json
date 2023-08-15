@@ -5,7 +5,7 @@
 
 	// Use docker-compose.extend.yml to run a command that keeps the container running.
 	"dockerComposeFile": ["../docker-compose.yml"],
-	"service": "test-ac-task",
+	"service": "ac-task",
 	"workspaceFolder": "/home/vscode",
 	"shutdownAction": "stopCompose",
 

@@ -1,6 +1,6 @@
 version: "3.3"
 services:
-  test-ac-task:
+  ac-task:
     build:
       context: .
       dockerfile: .devcontainer/Dockerfile
@@ -17,9 +17,8 @@ services:
       - ./scripts:/home/vscode/scripts
       - ./dotfiles/.vscode:/home/vscode/.vscode
       - ./templates/mytemplate:/home/vscode/mytemplate
-    image: test
-    container_name: test-ac-task
+    image: ac-img
+    container_name: ac-task
     environment:
       - ACUSER=${acUSERNAME}
       - REMOTE=${acGITREPOSITORY}
-
