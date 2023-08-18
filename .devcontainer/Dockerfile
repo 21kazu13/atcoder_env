@@ -92,10 +92,15 @@ ENV SHELL=/usr/bin/zsh
 # from here, python package installation
 COPY --chown=$USERNAME ./requirement/*.txt /tmp/
 RUN python -m pip install -U setuptools==66.0.0 \
-    && python -m pip install cmake wheel \
+    && TORCHVERSION=$( \
+        case ${TARGETPLATFORM} in \
+            linux/amd64 ) echo "1.13.1";; \
+            linux/arm64 ) echo "2.0.0";; \
+        esac \
+    ) \
+    && python -m pip install torch==$TORCHVERSION \
     && python -m pip install -r /tmp/requirements_python.txt
 RUN pypy3 -m pip install -r /tmp/requirements_pypy.txt
-RUN python -m pip install online-judge-tools==11.5.1
 
 # Countermeasure for oj
 # export PATH=$PATH:/home/$(whoami)/.local/bin
