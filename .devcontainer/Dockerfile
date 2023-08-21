@@ -22,6 +22,8 @@ RUN apt-get update \
         # https://github.com/deepgully/pyzil/issues/6
         # https://devpress.csdn.net/k8s/62fceb917e66823466190f7a.html
         libgmp-dev libmpc-dev libmpfr-dev \
+        # unzip required by oh-my-posh
+        unzip \
     && apt-get -y install nodejs npm \
     && apt-get autoremove -y \
     && apt-get clean -y \
@@ -80,14 +82,7 @@ RUN groupadd --gid $USER_GID $USERNAME \
     && echo $USERNAME ALL=\(ALL\) ALL >> /etc/sudoers.d/$USERNAME \
     && chmod 0440 /etc/sudoers.d/$USERNAME
 
-# Install for oh-my-posh
-COPY --chown=$USERNAME ./dotfiles/.iterm2.omp.json /home/$USERNAME/
-RUN wget https://github.com/JanDeDobbeleer/oh-my-posh/releases/latest/download/posh-linux-amd64 -O /usr/local/bin/oh-my-posh \
-    && chmod +x /usr/local/bin/oh-my-posh
-
-# change default shell
 USER $USERNAME
-ENV SHELL=/usr/bin/zsh
 
 # from here, python package installation
 COPY --chown=$USERNAME ./requirement/*.txt /tmp/
@@ -99,8 +94,8 @@ RUN python -m pip install -U setuptools==66.0.0 \
         esac \
     ) \
     && python -m pip install torch==$TORCHVERSION \
-    && python -m pip install -r /tmp/requirements_python.txt
-RUN pypy3 -m pip install -r /tmp/requirements_pypy.txt
+    && python -m pip install -r /tmp/requirements_python.txt \
+    && pypy3 -m pip install -r /tmp/requirements_pypy.txt
 
 # Countermeasure for oj
 # export PATH=$PATH:/home/$(whoami)/.local/bin
@@ -113,6 +108,15 @@ WORKDIR /home/$USERNAME
 # COPY setting files from host
 COPY --chown=$USERNAME ./dotfiles/.zshrc /home/$USERNAME/
 COPY --chown=$USERNAME:$USERNAME templates/atcoder-cli-nodejs/ /home/$USERNAME/.config/atcoder-cli-nodejs/
+COPY --chown=$USERNAME ./dotfiles/.iterm2.omp.json /home/$USERNAME/
+
+# # Install for oh-my-posh
+RUN curl -s https://ohmyposh.dev/install.sh | bash -s -- -d ~/.local/bin
+# RUN wget https://github.com/JanDeDobbeleer/oh-my-posh/releases/latest/download/posh-linux-amd64 -O /usr/local/bin/oh-my-posh \
+#     && chmod +x /usr/local/bin/oh-my-posh
+
+# change default shell
+ENV SHELL=/usr/bin/zsh
 
 # Enable atcoder-cli configuration
 RUN acc config default-template py \
