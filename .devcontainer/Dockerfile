@@ -83,6 +83,9 @@ RUN groupadd --gid $USER_GID $USERNAME \
     && chmod 0440 /etc/sudoers.d/$USERNAME
 
 USER $USERNAME
+# Countermeasure for oj
+# export PATH=$PATH:/home/$(whoami)/.local/bin
+ENV PATH=$PATH:/home/$USERNAME/.local/bin
 
 # from here, python package installation
 COPY --chown=$USERNAME ./requirement/*.txt /tmp/
@@ -95,11 +98,8 @@ RUN python -m pip install -U setuptools==66.0.0 \
     ) \
     && python -m pip install torch==$TORCHVERSION \
     && python -m pip install -r /tmp/requirements_python.txt \
-    && pypy3 -m pip install -r /tmp/requirements_pypy.txt
-
-# Countermeasure for oj
-# export PATH=$PATH:/home/$(whoami)/.local/bin
-ENV PATH=$PATH:/home/$USERNAME/.local/bin
+    && pypy3 -m pip install -r /tmp/requirements_pypy.txt \
+    && pip cache purge
 
 # Working directory for 'RUN', 'CMD', 'ENTRYPOINT, 'COPY', 'ADD'
 # https://docs.docker.jp/engine/reference/builder.html#workdir
