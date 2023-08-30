@@ -12,6 +12,12 @@ RUN apt update \
 
 RUN python -m pip install -U setuptools==66.0.0 wheel \
     && python -m pip wheel -w /tmp/wheels -r req_python-$(uname -m).txt
+# https://oregengo.hatenablog.com/entry/2016/12/20/175835
+# from pip._internal.utils.compatibility_tags import get_supported
+RUN UNAME=$(uname -m) \
+    && case ${UNAME} in \
+        aarch64 ) mv wheels/z3_solver-4.12.1.0-py2.py3-none-manylinux1_aarch64.whl wheels/z3_solver-4.12.1.0-py2.py3-none-linux_aarch64.whl;; \
+    esac
 
 FROM pypy:3.10-7.3.12 as builder-pypy
 
@@ -33,6 +39,12 @@ RUN pypy -m pip install -U setuptools==66.0.0 wheel \
 RUN unlink /opt/pypy/bin/python \
     && unlink /opt/pypy/bin/python3 \
     && unlink /opt/pypy/bin/python3.10
+# https://oregengo.hatenablog.com/entry/2016/12/20/175835
+# from pip._internal.utils.compatibility_tags import get_supported
+RUN UNAME=$(uname -m) \
+    && case ${UNAME} in \
+        aarch64 ) mv wheels/z3_solver-4.12.1.0-py2.py3-none-manylinux1_aarch64.whl wheels/z3_solver-4.12.1.0-py2.py3-none-linux_aarch64.whl;; \
+    esac
 
 FROM node:18 as builder-acc
 ENV NODE_OPTIONS=--openssl-legacy-provider
@@ -57,7 +69,10 @@ ENV NODE_OPTIONS=--openssl-legacy-provider
 RUN --mount=type=bind,from=builder-python,source=/tmp/wheels,target=/tmp/wheels/python \
     --mount=type=bind,from=builder-pypy,source=/tmp/wheels,target=/tmp/wheels/pypy \
     python -m pip install --no-index --no-deps /tmp/wheels/python/*.whl --no-cache \
-    && pypy -m pip install --no-index --no-deps /tmp/wheels/pypy/*.whl --no-cache --no-warn-script-location
+    && pypy -m pip install --no-index --no-deps /tmp/wheels/pypy/*.whl --no-cache --no-warn-script-location \
+    # # hashlib.py:182: RuntimeWarning: The _hashlib module is not available, falling back to a much slower implementation (libssl.so.1.1: cannot open shared object file: No such file or directory
+    && cp /tmp/libs/$(uname -m)-linux-gnu/libssl.so.1.1 /usr/lib/$(uname -m)-linux-gnu/ \
+    && cp /tmp/libs/$(uname -m)-linux-gnu/libcrypto.so.1.1 /usr/lib/$(uname -m)-linux-gnu/
 
 RUN apt update \
     && apt install -y --no-install-recommends \
