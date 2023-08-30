@@ -5,6 +5,13 @@ COPY requirement/req_python-*.txt .
 
 RUN apt update \
     && apt install -y \
+        # 5092.4   ERROR: Failed building wheel for gmpy2
+        # 5092.4       src/gmpy2.h:82:10: fatal error: mpfr.h: No such file or directory
+        # 5092.4          82 | #include <mpfr.h>        
+        # 14498.0          83 | #include <mpc.h>
+        libmpfr-dev \
+        libgmp-dev \
+        libmpc-dev \
         # required from build of online-judge-tools (lxml)
         libxml2-dev \
         libxslt-dev \
@@ -98,8 +105,8 @@ COPY --from=builder-acc /tmp/atcoder-cli /tmp/atcoder-cli
 COPY --from=builder-acc /usr/local/lib/node_modules /usr/local/lib/node_modules
 
 # hashlib.py:182: RuntimeWarning: The _hashlib module is not available, falling back to a much slower implementation (libssl.so.1.1: cannot open shared object file: No such file or directory
-COPY --from=builder-pypy /usr/lib/x86_64-linux-gnu/libssl.so.1.1 /usr/lib/x86_64-linux-gnu/libssl.so.1.1
-COPY --from=builder-pypy /usr/lib/x86_64-linux-gnu/libcrypto.so.1.1 /usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+# COPY --from=builder-pypy /usr/lib/x86_64-linux-gnu/libssl.so.1.1 /usr/lib/x86_64-linux-gnu/libssl.so.1.1
+# COPY --from=builder-pypy /usr/lib/x86_64-linux-gnu/libcrypto.so.1.1 /usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
 
 RUN ln -s /usr/local/lib/node_modules/atcoder-cli/bin/index.js /usr/local/bin/acc
 
