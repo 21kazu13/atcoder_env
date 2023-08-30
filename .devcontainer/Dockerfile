@@ -1,8 +1,7 @@
 FROM python:3.11.4 as builder-python
 
 WORKDIR /tmp
-COPY req_python-x86_64.txt .
-COPY req_python-arm64.txt .
+COPY requirement/req_python-*.txt .
 
 RUN apt update \
     && apt install -y \
@@ -28,7 +27,7 @@ RUN apt update \
         libgeos-dev
 
 WORKDIR /tmp
-COPY req_pypy.txt .
+COPY requirement/req_pypy.txt .
 RUN pypy -m pip install -U setuptools==66.0.0 wheel \
     && pypy -m pip wheel -w /tmp/wheels -r req_pypy.txt
 RUN unlink /opt/pypy/bin/python \
