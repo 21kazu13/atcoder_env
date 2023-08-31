@@ -10,5 +10,6 @@
     "python.analysis.extraPaths": [
         "/home/vscode/scripts"
     ],
-    "python.testing.autoTestDiscoverOnSaveEnabled": false
+    "python.testing.autoTestDiscoverOnSaveEnabled": false,
+    "git.ignoreLimitWarning": true
 }

@@ -22,4 +22,3 @@ services:
     environment:
       - ACUSER=${acUSERNAME}
       - REMOTE=${acGITREPOSITORY}
-

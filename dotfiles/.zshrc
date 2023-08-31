@@ -23,5 +23,5 @@ do; source $fn; done
 alias aclone='git clone --depth 1 ${REMOTE} && cd AtCoder'
 
 echo 'Make sure to log-in to atcoder-cli and online-judge-tools.'
-echo 'Just execute "login" for both login.'
+echo 'Just execute "aclogin" for both login.'
 echo 'Run "aclone" to clone from remote repository after launch.'
