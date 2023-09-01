@@ -75,6 +75,7 @@ ENV NODE_OPTIONS=--openssl-legacy-provider
 
 RUN --mount=type=bind,from=builder-python,source=/tmp/wheels,target=/tmp/wheels/python \
     --mount=type=bind,from=builder-pypy,source=/tmp/wheels,target=/tmp/wheels/pypy \
+    --mount=type=bind,from=builder-pypy,source=/usr/lib,target=/tmp/libs \
     python -m pip install --no-index --no-deps /tmp/wheels/python/*.whl --no-cache \
     && pypy -m pip install --no-index --no-deps /tmp/wheels/pypy/*.whl --no-cache --no-warn-script-location \
     # # hashlib.py:182: RuntimeWarning: The _hashlib module is not available, falling back to a much slower implementation (libssl.so.1.1: cannot open shared object file: No such file or directory
