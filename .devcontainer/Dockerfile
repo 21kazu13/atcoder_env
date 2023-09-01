@@ -13,15 +13,13 @@ ARG CERT_DIR=/etc/ssl/certs/
 # https://qiita.com/hi-naoya/items/d325a57d24a39e4d03e8
 FROM ubuntu:22.10 as cert
 COPY dotfiles/* /usr/share/ca-certificates/extra/
+RUN apt update && \
+    apt-get install -y ca-certificates
 RUN if [ -e /usr/share/ca-certificates/extra/nscacert.pem ]; then \
-        apt update && \
-        apt-get install -y ca-certificates && \
         # update-ca-certificates will fail without this.
         # http://www.maibun.org/~nt/technicalnote/centos8/ssl4.html
         echo 'extra/nscacert.pem' >> /etc/ca-certificates.conf ; \
     fi
-# TODO
-# Investigate whether this should be separated or not 
 RUN update-ca-certificates
 
 #####################################
