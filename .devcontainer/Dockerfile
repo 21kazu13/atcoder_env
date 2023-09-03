@@ -60,6 +60,10 @@ RUN UNAME=$(uname -m) \
         aarch64 ) mv wheels/z3_solver-4.12.1.0-py2.py3-none-manylinux1_aarch64.whl wheels/z3_solver-4.12.1.0-py2.py3-none-linux_aarch64.whl;; \
     esac
 
+# separate support tools from runtime packages.
+COPY requirement/req_support_python.txt .
+RUN python -m pip wheel -w /tmp/wheels -r req_support_python.txt
+
 #################################
 ### Build pypy3.10 pip wheels ###
 #################################

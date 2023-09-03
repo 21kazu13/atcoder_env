@@ -1,0 +1,3 @@
+online-judge-tools==11.5.1
+online-judge-template-generator==4.8.1
+online-judge-verify-helper==2.2.0
