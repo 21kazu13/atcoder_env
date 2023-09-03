@@ -67,21 +67,7 @@ RUN python -m pip wheel -w /tmp/wheels -r req_support_python.txt
 #################################
 ### Build pypy3.10 pip wheels ###
 #################################
-FROM pypy:3.10-7.3.12 as builder-pypy
-
-RUN apt update \
-    && apt install -y --no-install-recommends \
-        # ../../meson.build:63:0: ERROR: Unknown compiler(s): [['gfortran'], ['flang'], ['nvfortran'], ['pgfortran'], ['ifort'], ['ifx'], ['g95']]
-        gfortran \
-        # ../../scipy/meson.build:134:7: ERROR: Dependency "OpenBLAS" not found, tried pkgconfig
-        # https://qiita.com/itotomball/items/3ec9eddbe0f6cbab66ad
-        libopenblas-dev \
-        # src/geos.h:15:10: fatal error: geos_c.h: No such file or directory
-        # https://techoverflow.net/2021/08/13/6348/
-        libgeos-dev
-
-WORKDIR /tmp
-COPY requirement/req_pypy.txt .
+FROM ubuntu:22.10 as builder-pypy
 
 # copy cert and set environment valuables for pip
 ARG CERT_PATH
@@ -93,12 +79,39 @@ ENV REQUESTS_CA_BUNDLE=${CERT_PATH}
 ENV CERT_DIR=${CERT_DIR}
 ENV SSL_CERT_DIR=${CERT_DIR}
 
+RUN apt update \
+    && apt install -y --no-install-recommends \
+        # for cppyy with python runtime, g++ should be g++12
+        git wget bzip2 \
+        gcc g++ gfortran libopenblas-dev liblapack-dev pkg-config libgeos-dev \
+        # python3 and build-essential is required for cppyy installation
+        build-essential python3 \
+        vim sudo
+
+# install pypy from the source, for cppyy with python runtime, g++ should be g++12
+# # since pypy:3.10-7.3.12 is working with g++10, then it causes following error
+# # ERROR in cling::CIFactory::createCI(): cannot extract standard library include paths!
+WORKDIR /
+ARG TARGETPLATFORM
+RUN TARGETPYPY=$( \
+        case ${TARGETPLATFORM} in \
+            linux/amd64 ) echo "linux64";; \
+            linux/arm64 ) echo "aarch64";; \
+        esac \
+    ) && \
+    wget https://downloads.python.org/pypy/pypy3.10-v7.3.12-${TARGETPYPY}.tar.bz2 \
+    && tar -xvf pypy3.10-v7.3.12-${TARGETPYPY}.tar.bz2 -C /usr/local \
+    && ln -s /usr/local/pypy3.10-v7.3.12-${TARGETPYPY}/bin/pypy3 /usr/local/bin/pypy3 \
+    && ln -s /usr/local/pypy3.10-v7.3.12-${TARGETPYPY}/bin/pypy /usr/local/bin/pypy \
+    && wget https://bootstrap.pypa.io/get-pip.py \
+    && pypy3 get-pip.py --break-system-packages 
+
+WORKDIR /tmp
+COPY requirement/req_pypy.txt .
+
 RUN pypy -m pip install -U setuptools==66.0.0 wheel \
     && pypy -m pip wheel -w /tmp/wheels -r req_pypy.txt
-# unlink pypy3.10 from "python" because python is used by python3.11.4
-RUN unlink /opt/pypy/bin/python \
-    && unlink /opt/pypy/bin/python3 \
-    && unlink /opt/pypy/bin/python3.10
+
 # Current pip version and z3-solver is not supported aarch64 wheels (just file name issue?)
 # https://oregengo.hatenablog.com/entry/2016/12/20/175835
 # from pip._internal.utils.compatibility_tags import get_supported
@@ -135,24 +148,22 @@ RUN npm install \
 FROM python:3.11.4-slim as runner
 
 # copy pypy3 runtime
-COPY --from=builder-pypy /opt/pypy /usr/local/pypy
-RUN ln -s /usr/local/pypy/bin/pypy3 /usr/local/bin/pypy3 \
-    && ln -s /usr/local/pypy/bin/pypy /usr/local/bin/pypy 
+ARG TARGETPLATFORM
+RUN --mount=type=bind,from=builder-pypy,source=/usr/local,target=/tmp/ \
+    TARGETPYPY=$( \
+        case ${TARGETPLATFORM} in \
+            linux/amd64 ) echo "linux64";; \
+            linux/arm64 ) echo "aarch64";; \
+        esac \
+    ) \
+    && cp -r /tmp/pypy3.10-v7.3.12-${TARGETPYPY} /usr/local/ \
+    && ln -s /usr/local/pypy3.10-v7.3.12-${TARGETPYPY}/bin/pypy3 /usr/local/bin/pypy3 \
+    && ln -s /usr/local/pypy3.10-v7.3.12-${TARGETPYPY}/bin/pypy /usr/local/bin/pypy 
 
 # For cppyy with MacM1
 # cppyy-backend https://github.com/wlav/cppyy-backend/blob/master/cling/python/cppyy_backend/loader.py
 # when CURRENT_ARGS += ' -O2 -march=native' selected, import fails
 ENV EXTRA_CLING_ARGS=' -O2'
-
-# copy wheels from pypy / python
-RUN --mount=type=bind,from=builder-python,source=/tmp/wheels,target=/tmp/wheels/python \
-    --mount=type=bind,from=builder-pypy,source=/tmp/wheels,target=/tmp/wheels/pypy \
-    --mount=type=bind,from=builder-pypy,source=/usr/lib,target=/tmp/libs \
-    python -m pip install --no-index --no-deps /tmp/wheels/python/*.whl --no-cache \
-    && pypy -m pip install --no-index --no-deps /tmp/wheels/pypy/*.whl --no-cache --no-warn-script-location \
-    # # hashlib.py:182: RuntimeWarning: The _hashlib module is not available, falling back to a much slower implementation (libssl.so.1.1: cannot open shared object file: No such file or directory
-    && cp /tmp/libs/$(uname -m)-linux-gnu/libssl.so.1.1 /usr/lib/$(uname -m)-linux-gnu/ \
-    && cp /tmp/libs/$(uname -m)-linux-gnu/libcrypto.so.1.1 /usr/lib/$(uname -m)-linux-gnu/
 
 # Install some required packages
 RUN apt update \
@@ -173,6 +184,7 @@ RUN apt update \
         # required my usage in container
         zsh \
         ssh \
+        # sudo \
     && apt-get autoremove -y \
     && apt-get clean -y \
     && rm -rf /var/lib/apt/lists/*
@@ -217,7 +229,7 @@ ARG USER_GID=$USER_UID
 RUN groupadd --gid $USER_GID $USERNAME \
     && useradd --uid $USER_UID --gid $USER_GID -m $USERNAME \
     && echo $USERNAME:$USERPASSWD | chpasswd 
-# Add sudo support for non-root user
+    # # Add sudo support for non-root user
     # && echo $USERNAME ALL=\(ALL\) ALL >> /etc/sudoers.d/$USERNAME \
     # && chmod 0440 /etc/sudoers.d/$USERNAME
 
@@ -225,6 +237,13 @@ RUN groupadd --gid $USER_GID $USERNAME \
 # https://docs.docker.jp/engine/reference/builder.html#workdir
 USER $USERNAME
 WORKDIR /home/$USERNAME
+
+# copy wheels from pypy / python
+ENV PATH=$PATH:/home/$USERNAME/.local/bin
+RUN --mount=type=bind,from=builder-python,source=/tmp/wheels,target=/tmp/wheels/python \
+    --mount=type=bind,from=builder-pypy,source=/tmp/wheels,target=/tmp/wheels/pypy \
+    python -m pip install --no-index --no-deps /tmp/wheels/python/*.whl --no-cache --user\
+    && pypy -m pip install --no-index --no-deps /tmp/wheels/pypy/*.whl --no-cache --no-warn-script-location --user
 
 # COPY setting files from host
 COPY --chown=$USERNAME ./dotfiles/.zshrc /home/$USERNAME/

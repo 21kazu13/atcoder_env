@@ -17,7 +17,7 @@ services:
       - ./scripts:/home/vscode/scripts
       - ./dotfiles/.vscode:/home/vscode/.vscode
       - ./templates/mytemplate:/home/vscode/mytemplate
-    image: ac-img:2.2.0
+    image: ac-img:2.2.1
     container_name: ac-task
     environment:
       - ACUSER=${acUSERNAME}
