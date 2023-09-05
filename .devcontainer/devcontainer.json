@@ -9,11 +9,37 @@
 	"workspaceFolder": "/home/vscode",
 	"shutdownAction": "stopCompose",
 
-	// Set *default* container specific settings.json values on container create.
-	"settings": {},
-	
-	// Add the IDs of extensions you want installed when the container is created.
-	"extensions": ["ms-python.python","shd101wyy.markdown-preview-enhanced","ms-python.vscode-pylance"]
+	"customizations": {
+		// Configure properties specific to VS Code.
+		"vscode": {
+			// Set *default* container specific settings.json values on container create.
+			"settings": {
+				"terminal.integrated.enableMultiLinePasteWarning": false,
+				"git.ignoreLimitWarning": true,
+				"python.autoComplete.extraPaths": [
+					"/home/vscode/scripts"
+				],
+				"python.analysis.extraPaths": [
+					"/home/vscode/scripts"
+				],
+				"files.exclude": {
+					"**.cache": true,
+					".vscode-server**": true,
+					"**/.[!(v|c)]*": true
+				},
+				"vscode-pets.petSize": "large",
+				"vscode-pets.petType": "totoro"
+			},
+			"extensions": [
+				"ms-python.python",
+				"ms-python.vscode-pylance",
+				// "ms-python.pylint",
+				"shd101wyy.markdown-preview-enhanced",
+				"tonybaloney.vscode-pets",
+				"oderwat.indent-rainbow"
+			]
+		}
+	}
 
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
 	// "forwardPorts": [],
@@ -24,6 +50,7 @@
 	// Uncomment when using a ptrace-based debugger like C++, Go, and Rust
 	// "runArgs": [ "--cap-add=SYS_PTRACE", "--security-opt", "seccomp=unconfined" ],
 
+	// TODO (or consider in docker-compose side)
 	// Uncomment to use the Docker CLI from inside the container. See https://aka.ms/vscode-remote/samples/docker-from-docker.
 	// "mounts": [ "source=/var/run/docker.sock,target=/var/run/docker.sock,type=bind" ],
 
