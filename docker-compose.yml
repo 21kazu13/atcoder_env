@@ -1,23 +1,26 @@
 version: "3.3"
 services:
   ac-task:
-    # build:
-    #   context: .
-    #   dockerfile: .devcontainer/Dockerfile
-    #   args:
-    #     - TZ=$acTIMEZONE
-    #     - GITNAME=$acGITNAME
-    #     - GITEMAIL=$acGITEMAIL
-    #   # should edit workspace directory in devcontainer.json when you change USERNAME
-    #     - USERNAME=vscode
-    #     - USERPASSWD=vscode
+    build:
+      context: .
+      dockerfile: .devcontainer/Dockerfile
+      args:
+        - TZ=$acTIMEZONE
+        - GITNAME=$acGITNAME
+        - GITEMAIL=$acGITEMAIL
+      # should edit workspace directory in devcontainer.json when you change USERNAME
+        - USERNAME=vscode
+        - USERPASSWD=vscode
     tty: true
     volumes:
       - ${acSSHDIR}/.ssh:/home/vscode/.ssh:ro
       - ./scripts:/home/vscode/scripts
       - ./dotfiles/.vscode:/home/vscode/.vscode
       - ./templates/mytemplate:/home/vscode/mytemplate
-    image: ac-img:2.2.1
+      - type: bind
+        source: "/var/run/docker.sock"
+        target: "/var/run/docker.sock"
+    image: ac-img:2.2.2
     container_name: ac-task
     environment:
       - ACUSER=${acUSERNAME}
