@@ -11,7 +11,7 @@ ARG CERT_DIR=/etc/ssl/certs/
 # http://www.maibun.org/~nt/technicalnote/centos8/ssl4.html
 # https://qiita.com/kusanoiskuzuno/items/cf35b65a3c42c11be67c
 # https://qiita.com/hi-naoya/items/d325a57d24a39e4d03e8
-FROM ubuntu:22.10 as cert
+FROM ubuntu:22.04 as cert
 WORKDIR /usr/share/ca-certificates/extra/
 RUN --mount=type=bind,source=./certfiles,target=/usr/share/ca-certificates/extra/ \
     apt update && \
