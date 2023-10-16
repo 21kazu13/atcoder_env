@@ -11,7 +11,7 @@ ARG CERT_DIR=/etc/ssl/certs/
 # http://www.maibun.org/~nt/technicalnote/centos8/ssl4.html
 # https://qiita.com/kusanoiskuzuno/items/cf35b65a3c42c11be67c
 # https://qiita.com/hi-naoya/items/d325a57d24a39e4d03e8
-FROM ubuntu:22.10 as cert
+FROM ubuntu:22.04 as cert
 COPY dotfiles/* /usr/share/ca-certificates/extra/
 RUN apt update && \
     apt-get install -y ca-certificates
@@ -67,7 +67,7 @@ RUN python -m pip wheel -w /tmp/wheels -r req_support_python.txt
 #################################
 ### Build pypy3.10 pip wheels ###
 #################################
-FROM ubuntu:22.10 as builder-pypy
+FROM ubuntu:22.04 as builder-pypy
 
 # copy cert and set environment valuables for pip
 ARG CERT_PATH
