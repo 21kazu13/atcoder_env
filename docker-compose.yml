@@ -20,7 +20,7 @@ services:
       - type: bind
         source: "/var/run/docker.sock"
         target: "/var/run/docker.sock"
-    image: ac-img:2.2.2
+    image: ac-img:2.2.3
     container_name: ac-task
     environment:
       - ACUSER=${acUSERNAME}

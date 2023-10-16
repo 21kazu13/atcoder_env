@@ -11,17 +11,114 @@ ARG CERT_DIR=/etc/ssl/certs/
 # http://www.maibun.org/~nt/technicalnote/centos8/ssl4.html
 # https://qiita.com/kusanoiskuzuno/items/cf35b65a3c42c11be67c
 # https://qiita.com/hi-naoya/items/d325a57d24a39e4d03e8
-FROM ubuntu:22.10 as cert
-WORKDIR /usr/share/ca-certificates/extra/
-RUN --mount=type=bind,source=./certfiles,target=/usr/share/ca-certificates/extra/ \
-    apt update && \
-    apt-get install -y ca-certificates --no-install-recommends && \
-    for f in $(ls *.pem); do \
+FROM ubuntu:22.04 as cert
+COPY dotfiles/* /usr/share/ca-certificates/extra/
+RUN apt update && \
+    apt-get install -y ca-certificates
+RUN if [ -e /usr/share/ca-certificates/extra/nscacert.pem ]; then \
         # update-ca-certificates will fail without this.
         # http://www.maibun.org/~nt/technicalnote/centos8/ssl4.html
-        echo 'extra/'$f >> /etc/ca-certificates.conf ; \
-    done && \
-    update-ca-certificates
+        echo 'extra/nscacert.pem' >> /etc/ca-certificates.conf ; \
+    fi
+RUN update-ca-certificates
+
+#####################################
+### Build python3.11.4 pip wheels ###
+#####################################
+FROM python:3.11.4 as builder-python
+WORKDIR /tmp
+COPY requirement/req_python-*.txt .
+
+RUN apt update \
+    && apt install -y \
+        # required from build of gmpy2
+        libmpfr-dev \
+        libgmp-dev \
+        libmpc-dev \
+        # required from build of online-judge-tools (lxml)
+        libxml2-dev \
+        libxslt-dev \
+        zlib1g-dev 
+
+# copy cert and set environment valuables for pip
+ARG CERT_PATH
+ARG CERT_DIR
+COPY --from=cert $CERT_PATH $CERT_PATH
+ENV CERT_PATH=${CERT_PATH}
+ENV SSL_CERT_FILE=${CERT_PATH}
+ENV REQUESTS_CA_BUNDLE=${CERT_PATH}
+ENV CERT_DIR=${CERT_DIR}
+ENV SSL_CERT_DIR=${CERT_DIR}
+
+RUN python -m pip install -U setuptools==66.0.0 wheel \
+    && python -m pip wheel -w /tmp/wheels -r req_python-$(uname -m).txt
+# Current pip version and z3-solver is not supported aarch64 wheels (just file name issue?)
+# https://oregengo.hatenablog.com/entry/2016/12/20/175835
+# from pip._internal.utils.compatibility_tags import get_supported
+RUN UNAME=$(uname -m) \
+    && case ${UNAME} in \
+        aarch64 ) mv wheels/z3_solver-4.12.1.0-py2.py3-none-manylinux1_aarch64.whl wheels/z3_solver-4.12.1.0-py2.py3-none-linux_aarch64.whl;; \
+    esac
+
+# separate support tools from runtime packages.
+COPY requirement/req_support_python.txt .
+RUN python -m pip wheel -w /tmp/wheels -r req_support_python.txt
+
+#################################
+### Build pypy3.10 pip wheels ###
+#################################
+FROM ubuntu:22.04 as builder-pypy
+
+# copy cert and set environment valuables for pip
+ARG CERT_PATH
+ARG CERT_DIR
+COPY --from=cert $CERT_PATH $CERT_PATH
+ENV CERT_PATH=${CERT_PATH}
+ENV SSL_CERT_FILE=${CERT_PATH}
+ENV REQUESTS_CA_BUNDLE=${CERT_PATH}
+ENV CERT_DIR=${CERT_DIR}
+ENV SSL_CERT_DIR=${CERT_DIR}
+
+RUN apt update \
+    && apt install -y --no-install-recommends \
+        # for cppyy with python runtime, g++ should be g++12
+        git wget bzip2 \
+        gcc g++ gfortran libopenblas-dev liblapack-dev pkg-config libgeos-dev \
+        # python3 and build-essential is required for cppyy installation
+        build-essential python3 \
+        vim sudo
+
+# install pypy from the source, for cppyy with python runtime, g++ should be g++12
+# # since pypy:3.10-7.3.12 is working with g++10, then it causes following error
+# # ERROR in cling::CIFactory::createCI(): cannot extract standard library include paths!
+WORKDIR /
+ARG TARGETPLATFORM
+RUN TARGETPYPY=$( \
+        case ${TARGETPLATFORM} in \
+            linux/amd64 ) echo "linux64";; \
+            linux/arm64 ) echo "aarch64";; \
+        esac \
+    ) && \
+    wget https://downloads.python.org/pypy/pypy3.10-v7.3.12-${TARGETPYPY}.tar.bz2 \
+    && tar -xvf pypy3.10-v7.3.12-${TARGETPYPY}.tar.bz2 -C /usr/local \
+    && ln -s /usr/local/pypy3.10-v7.3.12-${TARGETPYPY}/bin/pypy3 /usr/local/bin/pypy3 \
+    && ln -s /usr/local/pypy3.10-v7.3.12-${TARGETPYPY}/bin/pypy /usr/local/bin/pypy \
+    && wget https://bootstrap.pypa.io/get-pip.py \
+    && pypy3 get-pip.py --break-system-packages 
+
+WORKDIR /tmp
+COPY requirement/req_pypy.txt .
+
+RUN pypy -m pip install -U setuptools==66.0.0 wheel \
+    && pypy -m pip wheel -w /tmp/wheels -r req_pypy.txt
+
+# Current pip version and z3-solver is not supported aarch64 wheels (just file name issue?)
+# https://oregengo.hatenablog.com/entry/2016/12/20/175835
+# from pip._internal.utils.compatibility_tags import get_supported
+RUN UNAME=$(uname -m) \
+    && case ${UNAME} in \
+        aarch64 ) mv wheels/z3_solver-4.12.1.0-py2.py3-none-manylinux1_aarch64.whl wheels/z3_solver-4.12.1.0-py2.py3-none-linux_aarch64.whl;; \
+    esac
 
 ##########################################
 ### Build npm packages for atcoder-cli ###
