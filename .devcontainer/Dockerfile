@@ -110,27 +110,32 @@ ENV TZ=$TZ
 # https://unit42.paloaltonetworks.jp/non-root-containers-kubernetes-cve-2019-11245-care/
 # https://qiita.com/syoyo/items/6fa6597b7a6625000e33
 ARG USER=vscode
-ARG USERNAME=$USER
 ARG USERPASSWD=$USER
 ARG USER_UID=1000
 ARG USER_GID=$USER_UID
 # ARG DOCKER_GID
-RUN groupadd --gid $USER_GID $USERNAME \
-    && useradd --uid $USER_UID --gid $USER_GID -m $USERNAME \
-    && echo $USERNAME:$USERPASSWD | chpasswd \
+RUN groupadd --gid $USER_GID $USER \
+    && useradd --uid $USER_UID --gid $USER_GID -m $USER \
+    && echo $USER:$USERPASSWD | chpasswd \
     # to modify gid of docker group in order to align with host setting 
     # If host's groupid of "docker" = 999, then you don't need to do 
     # && groupmod -g $DOCKER_GID docker
     && usermod -aG docker $USER
  
     # # Add sudo support for non-root user
-    # && echo $USERNAME ALL=\(ALL\) ALL >> /etc/sudoers.d/$USERNAME \
-    # && chmod 0440 /etc/sudoers.d/$USERNAME
+    # && echo $USER ALL=\(ALL\) ALL >> /etc/sudoers.d/$USER \
+    # && chmod 0440 /etc/sudoers.d/$USER
+
+# Manage ownwership of directly which volumes will be mounted to
+# # volume's owner which is created automatically by docker compose will be root
+# # https://github.com/docker/compose/issues/3270#issuecomment-206214034
+WORKDIR /home/$USER
+RUN mkdir work \
+    && chown $USER:$USER work
 
 # Working directory for 'RUN', 'CMD', 'ENTRYPOINT, 'COPY', 'ADD'
 # https://docs.docker.jp/engine/reference/builder.html#workdir
-USER $USERNAME
-WORKDIR /home/$USERNAME
+USER $USER
 
 # Install and configure oj
 ENV PATH=$PATH:/home/$USER/.local/lib/python3.10/site-packages:/home/$USER/.local/bin
@@ -138,9 +143,9 @@ RUN --mount=type=bind,source=./requirement,target=/tmp \
     python3 -m pip install --user --verbose -r /tmp/req_support_python.txt 
 
 # COPY setting files from host
-COPY --chown=$USERNAME ./dotfiles/.zshrc /home/$USERNAME/
-COPY --chown=$USERNAME:$USERNAME templates/atcoder-cli-nodejs/ /home/$USERNAME/.config/atcoder-cli-nodejs/
-COPY --chown=$USERNAME ./dotfiles/.iterm2.omp.json /home/$USERNAME/
+COPY --chown=$USER ./dotfiles/.zshrc /home/$USER/
+COPY --chown=$USER:$USER templates/atcoder-cli-nodejs/ /home/$USER/.config/atcoder-cli-nodejs/
+COPY --chown=$USER ./dotfiles/.iterm2.omp.json /home/$USER/
 
 # change default shell
 ENV SHELL=/usr/bin/zsh
@@ -157,3 +162,4 @@ RUN git config --global user.name $GITNAME \
     && git config --global user.email $GITEMAIL
 
 # CMD ["docker", "run", "--rm", "ubuntu:22.04", "echo", "'hello from ubuntu with dood'"]
+WORKDIR /home/$USER/work

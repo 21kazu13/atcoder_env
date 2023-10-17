@@ -20,6 +20,9 @@ services:
         source: "/var/run/docker.sock"
         target: "/var/run/docker.sock"
         read_only: true
+      - type: volume
+        source: atcoder
+        target: /home/vscode/work
     image: ac-img:2.2.4
     container_name: ac-task
     environment:
@@ -34,6 +37,7 @@ services:
     image: ac-runner-python
     container_name: ac-runner-python
     command: python -c 'import cppyy, numpy, scipy, networkx, sympy, sortedcontainers, more_itertools, shapely, bitarray, pulp, mpmath, pandas, z3, sklearn, ortools, torch, polars, lightgbm, gmpy2, numba, atcoder' && oj --help
+    # runner should mount volume when running container
 
   ac-runner-pypy:
     build:
@@ -42,6 +46,18 @@ services:
     image: ac-runner-pypy
     container_name: ac-run-pypy
     command: pypy -c 'import cppyy, numpy, scipy, networkx, sympy, sortedcontainers, more_itertools, shapely, bitarray, pulp, mpmath, pandas, z3, sklearn, typing_extensions, atcoder' && oj --help
+    # runner should mount volume when running container
 
 # need to update...
-# volumes:
+# memo: 下記で全体マウントして今のディレクトリでコマンド走らせられる
+# docker run --rm -it --mount type=volume,src=atcoder,dst=$HOME/work -w $(pwd) ac-runner-pypy oj t -c 'pypy main.py'
+
+# create permanent volume
+# https://zenn.dev/ajapa/articles/1369a3c0e8085d
+# https://docs.docker.jp/v1.12/compose/compose-file.html#volumes-volume-driver
+# https://qiita.com/gounx2/items/23b0dc8b8b95cc629f32
+# https://qiita.com/aki_55p/items/63c47214cab7bcb027e0
+# https://qiita.com/ymktmk/items/d32f696070490d90d218
+volumes:
+  atcoder:
+    name: atcoder
