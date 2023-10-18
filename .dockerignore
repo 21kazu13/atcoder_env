@@ -4,3 +4,4 @@
 .ssh/**
 README.md
 requirement/memo*
+dotfiles/.env*

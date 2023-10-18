@@ -52,7 +52,7 @@
 			"\t\tif prime[i] == i:",
 			"\t\t\tfor j in range(2,n//i+1):",
 			"\t\t\t\tprime[j*i] = i",
-			"# \treturn prime # to return fast prime factorization",
+			"\treturn prime # to return fast prime factorization",
 			"\treturn [i for i,v in enumerate(prime) if i==v] # to return prime list"
 		],
 		"description": "sieve of eratosthenes, it can use faster divisor calculations"
