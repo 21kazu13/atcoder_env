@@ -143,17 +143,10 @@ RUN --mount=type=bind,source=./requirement,target=/tmp \
     python3 -m pip install --user --verbose -r /tmp/req_support_python.txt 
 
 # COPY setting files from host
-COPY --chown=$USER ./dotfiles/.zshrc /home/$USER/
-COPY --chown=$USER:$USER templates/atcoder-cli-nodejs/ /home/$USER/.config/atcoder-cli-nodejs/
-COPY --chown=$USER ./dotfiles/.iterm2.omp.json /home/$USER/
+COPY --chown=$USER:$USER ./dotfiles/ /home/$USER/
 
 # change default shell
 ENV SHELL=/usr/bin/zsh
-
-# Enable atcoder-cli configuration
-RUN acc config default-template py \
-    && acc config default-task-choice all \
-    && acc config default-test-dirname-format test 
 
 # Enable git configuration
 ARG GITNAME
@@ -161,5 +154,6 @@ ARG GITEMAIL
 RUN git config --global user.name $GITNAME \
     && git config --global user.email $GITEMAIL
 
-# CMD ["docker", "run", "--rm", "ubuntu:22.04", "echo", "'hello from ubuntu with dood'"]
 WORKDIR /home/$USER/work
+# CMD ["ssh","-o","StrictHostKeyChecking=no", "-o", "UserKnownHostsFile=/dev/null","-T","git@github.com"]
+# CMD ["echo","'hello from ac-task"]

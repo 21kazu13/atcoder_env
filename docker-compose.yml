@@ -9,26 +9,30 @@ services:
         - GITNAME=$acGITNAME
         - GITEMAIL=$acGITEMAIL
       # should edit workspace directory in devcontainer.json when you change USERNAME in docker
-        # - USER=vscode
+        - USER=vscode
     tty: true
     volumes:
-      - ${acSSHDIR}/.ssh:/home/vscode/.ssh:ro
-      - ./scripts:/home/vscode/scripts
-      - ./dotfiles/.vscode:/home/vscode/.vscode
-      - ./templates/mytemplate:/home/vscode/mytemplate
+      # I wonder why this is working well (outside of build context...)
+      - /home/kazu/.ssh:/home/vscode/.ssh:ro
+      # This is not work because build context is /home/kazu/atcoder-env
+      # - type: bind
+      #   source: ./dotfiles/.ssh
+      #   target: /home/$USER/.ssh
+      #   read_only: true
       - type: bind
         source: "/var/run/docker.sock"
         target: "/var/run/docker.sock"
         read_only: true
       - type: volume
         source: atcoder
-        target: /home/vscode/work
+        target: /home/$USER/work
     image: ac-img:2.2.4
     container_name: ac-task
     environment:
       - ACUSER=${acUSERNAME}
       - REMOTE=${acGITREPOSITORY}
     # command: docker run --rm ubuntu:22.04 echo 'hello from ubuntu:22.04 with docker outside of docker.'
+    # command: ls -la /home/vscode/work/AtCoder
   
   ac-runner-python:
     build:
