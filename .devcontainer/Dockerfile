@@ -113,7 +113,9 @@ ENV NODE_OPTIONS=--openssl-legacy-provider
 # currently acc is not supported "-l" option in production build
 # clone develop branch directly build then we can select python3.11.4 directly
 WORKDIR /tmp
-RUN git clone https://github.com/Tatamo/atcoder-cli.git
+RUN apt-get update \
+    && apt-get install -y git \
+    && git clone https://github.com/Tatamo/atcoder-cli.git
 WORKDIR /tmp/atcoder-cli
 RUN npm install 
 
