@@ -118,7 +118,7 @@ FROM ubuntu:24.04 AS runner
 ARG AC_PYPY_VERSION
 ARG AC_CPYTHON_VERSION
 # copy python3 runtime
-COPY --from=builder /usr/local /usr/local
+COPY --from=builder-python /usr/local /usr/local
 
 # copy pypy3 runtime
 ARG TARGETPLATFORM
