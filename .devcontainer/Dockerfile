@@ -63,7 +63,9 @@ RUN apt-get update \
         # build-essential python3 \
         # vim sudo
         git wget bzip2 \
-        build-essential gfortran libopenblas-dev liblapack-dev pkg-config libgeos-dev
+        build-essential gfortran libopenblas-dev liblapack-dev pkg-config libgeos-dev \
+        #  fatal: unable to access 'https://github.com/not522/ac-library-python/': server certificate verification failed. CAfile: none CRLfile: none
+        ca-certificates
 
 # install pypy from the source, for cppyy with python runtime, g++ should be g++12
 # # since pypy:3.10-7.3.12 is working with g++10, then it causes following error
