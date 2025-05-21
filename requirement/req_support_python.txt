@@ -1,3 +1,4 @@
 online-judge-tools==11.5.1
-online-judge-template-generator==4.8.1
-online-judge-verify-helper==2.2.0
+# following packages are not supporting pip>=25.0.x
+# online-judge-template-generator==4.8.1
+# online-judge-verify-helper==2.2.0
