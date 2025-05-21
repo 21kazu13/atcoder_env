@@ -85,10 +85,13 @@ RUN TARGETPYPY=$( \
     wget -q https://downloads.python.org/pypy/pypy${AC_PYPY_VERSION}-${TARGETPYPY}.tar.bz2 \
     && tar jxvf pypy${AC_PYPY_VERSION}-${TARGETPYPY}.tar.bz2 \
     # activate pip
-    && ./pypy${AC_PYPY_VERSION}-${TARGETPYPY}/bin/pypy3 -m ensurepip \
-    && ./pypy${AC_PYPY_VERSION}-${TARGETPYPY}/bin/pip3 install --upgrade pip \
+    # https://docs.python.org/ja/3.13/library/ensurepip.html
+    && ./pypy${AC_PYPY_VERSION}-${TARGETPYPY}/bin/pypy3 -m ensurepip --upgrade --altinstall \
     # Setuptools最新化
-    && ./pypy${AC_PYPY_VERSION}-${TARGETPYPY}/bin/pypy3 -m pip install setuptools==75.8.0
+    && ./pypy${AC_PYPY_VERSION}-${TARGETPYPY}/bin/pypy3 -m pip install setuptools==75.8.0 \
+    && unlink ./pypy${AC_PYPY_VERSION}-${TARGETPYPY}/bin/python \
+    && unlink ./pypy${AC_PYPY_VERSION}-${TARGETPYPY}/bin/python3 \
+    && unlink ./pypy${AC_PYPY_VERSION}-${TARGETPYPY}/bin/python3.10
 
 COPY requirement/req_pypy.txt .
 
@@ -98,7 +101,7 @@ RUN TARGETPYPY=$( \
             linux/arm64 ) echo "aarch64";; \
         esac \
     ) && \
-    ./pypy${AC_PYPY_VERSION}-${TARGETPYPY}/bin/pypy3 -m pip wheel -w /tmp/wheels -r req_pypy.txt
+    ./pypy${AC_PYPY_VERSION}-${TARGETPYPY}/bin/pypy3.10 -m pip install --no-deps -r req_pypy.txt --no-warn-script-location
 
 ##########################################
 ### Build npm packages for atcoder-cli ###
@@ -141,7 +144,9 @@ RUN --mount=type=bind,from=builder-pypy,source=/tmp,target=/tmp/ \
     && cp -r /tmp/pypy${AC_PYPY_VERSION}-${TARGETPYPY}/lib/* /usr/local/lib \
     && cp -r /tmp/pypy${AC_PYPY_VERSION}-${TARGETPYPY}/include/* /usr/local/include \
     && ln -s /usr/local/pypy${AC_PYPY_VERSION}-${TARGETPYPY}/bin/pypy3 /usr/local/bin/pypy3 \
-    && ln -s /usr/local/pypy${AC_PYPY_VERSION}-${TARGETPYPY}/bin/pypy /usr/local/bin/pypy 
+    && ln -s /usr/local/pypy${AC_PYPY_VERSION}-${TARGETPYPY}/bin/pypy /usr/local/bin/pypy \
+    && ln -s /usr/local/python3.13 /usr/local/python \
+    && ln -s /usr/local/python3.13 /usr/local/python3 \
 
 # # For cppyy with MacM1
 # # cppyy-backend https://github.com/wlav/cppyy-backend/blob/master/cling/python/cppyy_backend/loader.py
