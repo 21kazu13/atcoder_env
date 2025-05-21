@@ -77,21 +77,13 @@ RUN TARGETPYPY=$( \
             linux/arm64 ) echo "aarch64";; \
         esac \
     ) && \
-# Resolving downloads.python.org (downloads.python.org)... 151.101.192.223, 151.101.0.223, 151.101.64.223, ...
-# Connecting to downloads.python.org (downloads.python.org)|151.101.192.223|:443... connected.
-# ERROR: cannot verify downloads.python.org's certificate, issued by 'CN=R10,O=Let\'s Encrypt,C=US':
-#   Unable to locally verify the issuer's authority.
-# To connect to downloads.python.org insecurely, use `--no-check-certificate'.
     wget -q https://downloads.python.org/pypy/pypy${AC_PYPY_VERSION}-${TARGETPYPY}.tar.bz2 \
     && tar jxvf pypy${AC_PYPY_VERSION}-${TARGETPYPY}.tar.bz2 \
     # activate pip
     # https://docs.python.org/ja/3.13/library/ensurepip.html
     && ./pypy${AC_PYPY_VERSION}-${TARGETPYPY}/bin/pypy3 -m ensurepip --upgrade --altinstall \
     # Setuptools最新化
-    && ./pypy${AC_PYPY_VERSION}-${TARGETPYPY}/bin/pypy3 -m pip install setuptools==75.8.0 \
-    && unlink ./pypy${AC_PYPY_VERSION}-${TARGETPYPY}/bin/python \
-    && unlink ./pypy${AC_PYPY_VERSION}-${TARGETPYPY}/bin/python3 \
-    && unlink ./pypy${AC_PYPY_VERSION}-${TARGETPYPY}/bin/python3.10
+    && ./pypy${AC_PYPY_VERSION}-${TARGETPYPY}/bin/pypy3 -m pip install setuptools==75.8.0 
 
 COPY requirement/req_pypy.txt .
 
@@ -101,7 +93,11 @@ RUN TARGETPYPY=$( \
             linux/arm64 ) echo "aarch64";; \
         esac \
     ) && \
-    ./pypy${AC_PYPY_VERSION}-${TARGETPYPY}/bin/pypy3.10 -m pip install --no-deps -r req_pypy.txt --no-warn-script-location
+    export PATH=$PATH:/tmp/pypy${AC_PYPY_VERSION}-${TARGETPYPY}/bin \
+    && ./pypy${AC_PYPY_VERSION}-${TARGETPYPY}/bin/pypy3.10 -m pip install --no-deps -r req_pypy.txt --no-warn-script-location \
+    && unlink ./pypy${AC_PYPY_VERSION}-${TARGETPYPY}/bin/python \
+    && unlink ./pypy${AC_PYPY_VERSION}-${TARGETPYPY}/bin/python3 \
+    && unlink ./pypy${AC_PYPY_VERSION}-${TARGETPYPY}/bin/python3.10
 
 ##########################################
 ### Build npm packages for atcoder-cli ###
