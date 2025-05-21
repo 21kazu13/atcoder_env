@@ -26,7 +26,7 @@ RUN wget -q https://www.python.org/ftp/python/${AC_CPYTHON_VERSION}/Python-${AC_
 WORKDIR /tmp/Python-${AC_CPYTHON_VERSION}
 
 RUN ./configure --enable-optimizations --with-lto=full --with-strict-overflow \
-    && RUN make -j$(nproc) \
+    && make -j$(nproc) \
     && make altinstall
 
 WORKDIR /tmp
@@ -82,7 +82,7 @@ RUN TARGETPYPY=$( \
 # ERROR: cannot verify downloads.python.org's certificate, issued by 'CN=R10,O=Let\'s Encrypt,C=US':
 #   Unable to locally verify the issuer's authority.
 # To connect to downloads.python.org insecurely, use `--no-check-certificate'.
-    wget -q https://downloads.python.org/pypy/pypy${AC_PYPY_VERSION}-${TARGETPYPY}.tar.bz2 --no-check-certificate\
+    wget -q https://downloads.python.org/pypy/pypy${AC_PYPY_VERSION}-${TARGETPYPY}.tar.bz2 \
     && tar jxvf pypy${AC_PYPY_VERSION}-${TARGETPYPY}.tar.bz2 \
     # activate pip
     && ./pypy${AC_PYPY_VERSION}-${TARGETPYPY}/bin/pypy3 -m ensurepip \
