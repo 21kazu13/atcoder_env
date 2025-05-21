@@ -75,7 +75,12 @@ RUN TARGETPYPY=$( \
             linux/arm64 ) echo "aarch64";; \
         esac \
     ) && \
-    wget -q https://downloads.python.org/pypy/pypy${AC_PYPY_VERSION}-${TARGETPYPY}.tar.bz2 \
+# Resolving downloads.python.org (downloads.python.org)... 151.101.192.223, 151.101.0.223, 151.101.64.223, ...
+# Connecting to downloads.python.org (downloads.python.org)|151.101.192.223|:443... connected.
+# ERROR: cannot verify downloads.python.org's certificate, issued by 'CN=R10,O=Let\'s Encrypt,C=US':
+#   Unable to locally verify the issuer's authority.
+# To connect to downloads.python.org insecurely, use `--no-check-certificate'.
+    wget -q https://downloads.python.org/pypy/pypy${AC_PYPY_VERSION}-${TARGETPYPY}.tar.bz2 --no-check-certificate\
     && tar jxvf pypy${AC_PYPY_VERSION}-${TARGETPYPY}.tar.bz2 \
     # activate pip
     && ./pypy${AC_PYPY_VERSION}-${TARGETPYPY}/bin/pypy3 -m ensurepip \
