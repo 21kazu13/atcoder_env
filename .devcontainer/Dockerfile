@@ -43,8 +43,11 @@ RUN python3.13 -m pip install setuptools==75.8.0 \
 WORKDIR /tmp/numba
 RUN sed -i 's/ext_cuda_extras, //' setup.py \
     && RUN rm -fr numba/cuda \
-    && python3.13 -m pip install . \
+    && python3.13 -m pip install .
 # clean up
+WORKDIR /tmp
+COPY requirement/req_support_python.txt .
+RUN python3.13 -m pip install -r req_support_python.txt --no-warn-script-location \
     && python3.13 -m pip cache purge
 
 
@@ -94,7 +97,7 @@ RUN TARGETPYPY=$( \
         esac \
     ) && \
     export PATH=$PATH:/tmp/pypy${AC_PYPY_VERSION}-${TARGETPYPY}/bin \
-    && ./pypy${AC_PYPY_VERSION}-${TARGETPYPY}/bin/pypy3.10 -m pip install --no-deps -r req_pypy.txt --no-warn-script-location \
+    && ./pypy${AC_PYPY_VERSION}-${TARGETPYPY}/bin/pypy3.10 -m pip install -r req_pypy.txt --no-warn-script-location \
     && unlink ./pypy${AC_PYPY_VERSION}-${TARGETPYPY}/bin/python \
     && unlink ./pypy${AC_PYPY_VERSION}-${TARGETPYPY}/bin/python3 \
     && unlink ./pypy${AC_PYPY_VERSION}-${TARGETPYPY}/bin/python3.10
@@ -102,7 +105,7 @@ RUN TARGETPYPY=$( \
 ##########################################
 ### Build npm packages for atcoder-cli ###
 ##########################################
-FROM node:18 AS builder-acc
+FROM node:22-slim AS builder-acc
 # atcoder-cli seems to be using old openssl
 # https://zenn.dev/yogarasu/articles/425732ff408d06
 ENV NODE_OPTIONS=--openssl-legacy-provider
@@ -112,9 +115,7 @@ ENV NODE_OPTIONS=--openssl-legacy-provider
 WORKDIR /tmp
 RUN git clone https://github.com/Tatamo/atcoder-cli.git
 WORKDIR /tmp/atcoder-cli
-RUN npm install \
-    && npm install -g \
-    && npm uninstall -g npm
+RUN npm install 
 
 ########################
 ### Build main stage ###
@@ -142,14 +143,9 @@ RUN --mount=type=bind,from=builder-pypy,source=/tmp,target=/tmp/ \
     && ln -s /usr/local/pypy${AC_PYPY_VERSION}-${TARGETPYPY}/bin/pypy3 /usr/local/bin/pypy3 \
     && ln -s /usr/local/pypy${AC_PYPY_VERSION}-${TARGETPYPY}/bin/pypy /usr/local/bin/pypy \
     && ln -s /usr/local/python3.13 /usr/local/python \
-    && ln -s /usr/local/python3.13 /usr/local/python3 \
+    && ln -s /usr/local/python3.13 /usr/local/python3
 
-# # For cppyy with MacM1
-# # cppyy-backend https://github.com/wlav/cppyy-backend/blob/master/cling/python/cppyy_backend/loader.py
-# # when CURRENT_ARGS += ' -O2 -march=native' selected, import fails
-# ENV EXTRA_CLING_ARGS=' -O2'
-
-# Install some required packages
+    # Install some required packages
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
         # required cppyy
@@ -209,14 +205,6 @@ RUN groupadd --gid $USER_GID $USERNAME \
 # https://docs.docker.jp/engine/reference/builder.html#workdir
 USER $USERNAME
 WORKDIR /home/$USERNAME
-
-# copy wheels from pypy / python
-# wheelだとconflict多すぎてinstallしてpackageを移すほうがよさそう
-# ENV PATH=$PATH:/home/$USERNAME/.local/bin
-# RUN --mount=type=bind,from=builder-python,source=/tmp/wheels,target=/tmp/wheels/python \
-#     --mount=type=bind,from=builder-pypy,source=/tmp/wheels,target=/tmp/wheels/pypy \
-#     python -m pip install --no-index --no-deps /tmp/wheels/python/*.whl --no-cache --user\
-#     && pypy -m pip install --no-index --no-deps /tmp/wheels/pypy/*.whl --no-cache --no-warn-script-location --user
 
 # COPY setting files from host
 COPY --chown=$USERNAME ./dotfiles/.zshrc /home/$USERNAME/
