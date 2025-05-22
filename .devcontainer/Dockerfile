@@ -112,11 +112,12 @@ ENV NODE_OPTIONS=--openssl-legacy-provider
 
 # currently acc is not supported "-l" option in production build
 # clone develop branch directly build then we can select python3.11.4 directly
-WORKDIR /tmp
+WORKDIR /usr/local/src
 RUN apt-get update \
-    && apt-get install -y git \
+    && apt-get install -y git curl unzip \
+    && curl -s https://ohmyposh.dev/install.sh | bash -s -- -d /usr/local/bin \
     && git clone https://github.com/Tatamo/atcoder-cli.git
-WORKDIR /tmp/atcoder-cli
+WORKDIR /usr/local/src/atcoder-cli
 RUN npm install \
     && npm install -g \
     && npm uninstall -g npm
@@ -161,8 +162,8 @@ RUN apt-get update \
         nodejs \
         time \
         # required from oh-my-posh installation
-        curl \
-        unzip \
+#        curl \
+#        unzip \
         # required my usage in container
         zsh \
         ssh \
@@ -172,14 +173,16 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/*
 
 # copy packages from atcoder-cli build
-COPY --from=builder-acc /tmp/atcoder-cli /tmp/atcoder-cli
+#COPY --from=builder-acc /tmp/atcoder-cli /tmp/atcoder-cli
+COPY --from=builder-acc /usr/local/src/atcoder-cli /usr/local/src/atcoder-cli
+COPY --from=builder-acc /usr/local/bin/oh-my-posh /usr/local/bin/oh-my-posh
 COPY --from=builder-acc /usr/local/lib/node_modules /usr/local/lib/node_modules
 
 # create cymbolic link for using atcoder-cli globally
 RUN ln -s /usr/local/lib/node_modules/atcoder-cli/bin/index.js /usr/local/bin/acc
 
 # Install for oh-my-posh
-RUN curl -s https://ohmyposh.dev/install.sh | bash -s 
+# RUN curl -s https://ohmyposh.dev/install.sh | bash -s 
 
 # Timezone Setting for Debian GNU/Linux 10
 # Ref: https://qiita.com/pyon_kiti_jp/items/e9235f9f49430bb845bb
