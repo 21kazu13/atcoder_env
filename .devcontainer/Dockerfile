@@ -117,7 +117,9 @@ RUN apt-get update \
     && apt-get install -y git \
     && git clone https://github.com/Tatamo/atcoder-cli.git
 WORKDIR /tmp/atcoder-cli
-RUN npm install 
+RUN npm install \
+    && npm install -g \
+    && npm uninstall -g npm
 
 ########################
 ### Build main stage ###
