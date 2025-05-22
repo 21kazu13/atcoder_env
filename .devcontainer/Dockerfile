@@ -43,7 +43,7 @@ RUN python3.13 -m pip install setuptools==75.8.0 \
 WORKDIR /tmp/numba
 RUN sed -i 's/ext_cuda_extras, //' setup.py \
     && rm -fr numba/cuda \
-    && python3.13 -m pip install . \
+    && python3.13 -m pip install . 
 # clean up
 WORKDIR /tmp
 COPY requirement/req_support_python.txt .
