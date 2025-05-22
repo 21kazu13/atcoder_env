@@ -42,8 +42,8 @@ RUN python3.13 -m pip install setuptools==75.8.0 \
 
 WORKDIR /tmp/numba
 RUN sed -i 's/ext_cuda_extras, //' setup.py \
-    && RUN rm -fr numba/cuda \
-    && python3.13 -m pip install .
+    && rm -fr numba/cuda \
+    && python3.13 -m pip install . \
 # clean up
 WORKDIR /tmp
 COPY requirement/req_support_python.txt .
@@ -142,10 +142,8 @@ RUN --mount=type=bind,from=builder-pypy,source=/tmp,target=/tmp/ \
     && cp -r /tmp/pypy${AC_PYPY_VERSION}-${TARGETPYPY}/bin/* /usr/local/bin \
     && cp -r /tmp/pypy${AC_PYPY_VERSION}-${TARGETPYPY}/lib/* /usr/local/lib \
     && cp -r /tmp/pypy${AC_PYPY_VERSION}-${TARGETPYPY}/include/* /usr/local/include \
-    && ln -s /usr/local/pypy${AC_PYPY_VERSION}-${TARGETPYPY}/bin/pypy3 /usr/local/bin/pypy3 \
-    && ln -s /usr/local/pypy${AC_PYPY_VERSION}-${TARGETPYPY}/bin/pypy /usr/local/bin/pypy \
-    && ln -s /usr/local/python3.13 /usr/local/python \
-    && ln -s /usr/local/python3.13 /usr/local/python3
+    && ln -s /usr/local/bin/python3.13 /usr/local/bin/python \
+    && ln -s /usr/local/bin/python3.13 /usr/local/bin/python3
 
     # Install some required packages
 RUN apt-get update \
@@ -153,9 +151,9 @@ RUN apt-get update \
         # required cppyy
         g++ \
         # required numpy, scipy, etc
-#        libopenblas-dev \
+        libopenblas-dev \
         # required shapely
-#        libgeos-dev \
+        libgeos-dev \
         # required from atcoder-cli
         git \
         nodejs \
