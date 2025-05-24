@@ -20,6 +20,7 @@ RUN apt-get install -y --no-install-recommends \
     libbz2-dev libffi-dev libgdbm-dev libgdbm-compat-dev liblzma-dev \
     libncurses5-dev libreadline6-dev libsqlite3-dev libssl-dev \
     lzma lzma-dev tk-dev uuid-dev zlib1g-dev git wget libgmp-dev libmpfr-dev libmpc-dev \
+    ca-certificates \
     && wget -q https://www.python.org/ftp/python/"${AC_CPYTHON_VERSION}"/"${TARGETPYTHON}".tar.xz -O "${TARGETPYTHON}".tar.xz \
     && tar xf "${TARGETPYTHON}".tar.xz
 
@@ -95,7 +96,7 @@ WORKDIR /usr/local/src
 # https://qiita.com/nossy/items/0f5572d84f4617207378
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends git curl unzip \
+    && apt-get install -y --no-install-recommends git curl unzip ca-certificates \
     && curl -s https://ohmyposh.dev/install.sh | bash -s -- -d /usr/local/bin \
     && git clone https://github.com/Tatamo/atcoder-cli.git
 WORKDIR /usr/local/src/atcoder-cli
@@ -146,6 +147,7 @@ RUN apt-get update \
         ssh \
         git \
         # sudo \
+        ca-certificates \
     && apt-get autoremove -y \
     && apt-get clean -y \
     && rm -rf /var/lib/apt/lists/*
