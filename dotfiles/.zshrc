@@ -2,7 +2,7 @@
 
 # customize
 # language
-export LANG=ja_JP.UTF-8
+# export LANG=ja_JP.UTF-8
 
 # color
 autoload -Uz colors
